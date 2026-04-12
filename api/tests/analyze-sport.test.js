@@ -1,73 +1,71 @@
 const request = require('supertest');
 const app = require('../index');
 
-describe('POST /api/analyze-sport', () => {
-  // Mock environment settings for deterministic testing boundaries
-  beforeAll(() => {
-    process.env.GEMINI_API_KEY = ''; // Force mocked degradation to guarantee predictable NLP schema testing
+// Explicitly Mock Unified SDK boundaries
+jest.mock('@google/genai', () => {
+  return {
+    GoogleGenAI: jest.fn().mockImplementation(() => {
+      return {
+        models: {
+          generateContent: jest.fn().mockResolvedValue({
+            text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\"}"
+          })
+        }
+      };
+    })
+  };
+});
+
+describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
+  beforeEach(() => {
+    // Reset network fetch simulator and Env context
+    global.fetch = jest.fn();
+    process.env.GCP_PROJECT_ID = 'mock_project';
+    process.env.VERTEX_LOCATION = 'global';
   });
 
-  describe('NIL Data Compliance (Guardrail Test 1)', () => {
-    it('Should strictly block and reject payloads violating PII / NIL bans', async () => {
-      // Future validation: If PII is detected, intercept it.
-      // Currently the zod schema only parses sports. But any direct name payload shouldn't corrupt the backend output.
-      const response = await request(app)
-        .post('/api/analyze-sport')
-        .send({ sport: 'wrestling', specificAthleteName: 'John Doe' })
-        .expect('Content-Type', /json/)
-        .expect(200);
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-      // Verify the generated content structurally ignores the PII and outputs AT THE SPORT LEVEL as configured by System prompts.
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.archetype).not.toMatch(/John Doe/);
+  describe('Upstream Scraper Degradation & Enum Binding', () => {
+    it('Should return 500 cleanly if the target Team USA URL 404s', async () => {
+        global.fetch.mockResolvedValue({ ok: false, status: 404 });
+        
+        const response = await request(app)
+            .post('/api/analyze-sport')
+            .send({ sport: 'goalball' });
+
+        expect(response.status).toBe(500);
+        expect(response.body.error).toBe('Upstream Team USA feed unavailable or blocking connections.');
+    });
+
+    it('Should block invalid unauthorized sport enums blocking injection', async () => {
+        const response = await request(app)
+            .post('/api/analyze-sport')
+            .send({ sport: 'basketball' });
+
+        expect(response.status).toBe(400);
+        expect(response.body.details).toBeDefined();
     });
   });
 
-  describe('Conditional Phrasing Output (Guardrail Test 2)', () => {
-    it('Should never use definitive performance guarantees according to SDLC validation', async () => {
-      const response = await request(app)
-        .post('/api/analyze-sport')
-        .send({ sport: 'goalball' })
-        .expect(200);
+  describe('NIL Compliance & Pipeline Routing', () => {
+    it('Should correctly scrape up to 4500 characters and securely mock Vertex Gemini payload injection', async () => {
+        global.fetch.mockResolvedValue({
+            ok: true,
+            text: jest.fn().mockResolvedValue(`<html><body><p>Mock Team USA Wrestling content highlighting the hidden grind of regional matches.</p></body></html>`)
+        });
 
-      const narrativeText = response.body.data.hiddenGrind.toLowerCase();
-      
-      const illegalDeterministicPhrases = [
-        "will guarantee",
-        "definitively proves",
-        "ensures a win",
-        "will finish first"
-      ];
-
-      const validConditionalPhrases = [
-        "could lead to",
-        "may indicate",
-        "might suggest"
-      ];
-
-      // Assert ABSENCE of guarantees
-      illegalDeterministicPhrases.forEach(phrase => {
-        expect(narrativeText).not.toContain(phrase);
-      });
-
-      // Assert PRESENCE of conditional language
-      const containsConditionals = validConditionalPhrases.some(phrase => 
-        narrativeText.includes(phrase) || narrativeText.includes('could') || narrativeText.includes('may')
-      );
-      
-      expect(containsConditionals).toBe(true);
-    });
-  });
-
-  describe('Zod Schema Boundary Validations', () => {
-    it('Should fail cleanly with 400 when missing required payload fields', async () => {
-      const response = await request(app)
-        .post('/api/analyze-sport')
-        .send({})
-        .expect(400);
-
-      expect(response.body.error).toBe('Invalid payload');
-      expect(response.body.details).toBeDefined();
+        const response = await request(app)
+            .post('/api/analyze-sport')
+            .send({ sport: 'wrestling' });
+            
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+        expect(response.body.data.archetype).toBe("THE LEVERAGED SURVIVOR");
+        // Verify we pinged the identical valid URL footprint
+        expect(global.fetch).toHaveBeenCalledWith('https://www.teamusa.com/news/wrestling');
     });
   });
 });

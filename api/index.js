@@ -1,71 +1,85 @@
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { z } = require('zod');
-
-require('dotenv').config();
+const cheerio = require('cheerio');
+const { GoogleGenAI } = require('@google/genai');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
+const PORT = process.env.PORT || 4000;
+
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 4000;
-
-// Initialize Google Gemini SDK
-// Note: We use a simulated API Key for local development or ADC in production (as per security rules)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'simulated-key-for-local');
-
+// Strict enum guard keeping injection requests isolated
 const requestSchema = z.object({
-  sport: z.string()
+  sport: z.enum(['wrestling', 'goalball'])
 });
 
 app.post('/api/analyze-sport', async (req, res) => {
   try {
-    const result = requestSchema.safeParse(req.body);
+    const parsed = requestSchema.safeParse(req.body);
     
-    if (!result.success) {
-      return res.status(400).json({ error: 'Invalid payload', details: result.error.errors });
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Invalid payload', details: parsed.error.issues });
+    }
+    
+    const { sport } = parsed.data;
+
+    // Upstream Fetch Adapter
+    const url = `https://www.teamusa.com/news/${sport}`;
+    const feedResponse = await fetch(url);
+    if (!feedResponse.ok) {
+        return res.status(500).json({ error: 'Upstream Team USA feed unavailable or blocking connections.' });
+    }
+    
+    // Cheerio Scraper extraction securing the Context Node Window
+    const htmlData = await feedResponse.text();
+    const $ = cheerio.load(htmlData);
+    const scrapedText = $('p').text().substring(0, 4500); 
+
+    if (!process.env.GCP_PROJECT_ID || !process.env.VERTEX_LOCATION) {
+      return res.status(500).json({ error: 'Failed to generate archetype. Please verify GCP Environment bindings (.env).' });
     }
 
-    const { sport } = result.data;
+    // Unified SDK binding automatically detecting User ADC context over Vertex configurations
+    const ai = new GoogleGenAI({
+        vertexai: true,
+        project: process.env.GCP_PROJECT_ID,
+        location: process.env.VERTEX_LOCATION
+    });
+
+    // Defensive System Injection verifying SDLC Guardrails natively over the unstructured data
+    const systemInstruction = `
+      You are an expert sports analyst focused on the "Hidden Grind" of non-mainstream sports.
+      CRITICAL RULE 1: Analyze the provided scraped text string from the Team USA feed. Nullify any Name, Image, or Likeness (NIL) tracking outputs into generalized structural observations of the sport itself.
+      CRITICAL RULE 2: You MUST use conditional phrasing (e.g., "could lead to", "might signify"). Absolute guarantees of performance are strictly forbidden.
+      Return valid JSON in this exact structure: {"archetype": "STRING MAX 4 WORDS", "hiddenGrind": "STRING MAXIMUM 3 SENTENCES"}
+      
+      SCRAPED TEAM USA FEED DATA:
+      ${scrapedText}
+    `;
+
+    const result = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: systemInstruction
+    });
     
-    // As instructed by Phase 2 prompt:
-    const hardcodedContext = "warehouse night shifts, car washes, moving at 17";
-
-    const systemInstruction = `You are the 'Unsung Heroes Engine', an analytical AI. Extract themes of financial strain, injury recovery, and family sacrifice from public Team USA blog data.
-STRICT GUARDRAILS: 
-1. NIL Ban: You are strictly prohibited from using any specific athlete's Name, Image, or Likeness. Output must be at the sport/archetype level. 
-2. Conditional Phrasing: Speak definitively about historical struggles, but strictly use conditional phrasing (e.g., 'could lead to', 'may indicate') when discussing performance outcomes to avoid implying performance guarantees. Never guarantee results.`;
-
-    const prompt = `Analyze the sport of ${sport} using the following historical narrative data: ${hardcodedContext}. Provide the response in JSON format with two keys: "archetype" (a short title, e.g. "The Leveraged Survivor") and "hiddenGrind" (a 2-3 sentence narrative describing the hidden grind, obeying all conditional phrasing rules).`;
-
-    // Attempting Gemini API Call
-    // Note: If no real key is present, we must degrade gracefully with mock data per test mandate
-    let archetype = "THE LEVERAGED SURVIVOR";
-    let hiddenGrind = `In the silence of the regional qualifying halls, the Hidden Grind manifests. It is the tactical accumulation of hours that the public eye never captures. For the Paralympic wrestlers, this isn't just about strength—it's about re-engineering leverage in a world designed for different bodies. Such relentless adaptation could lead to superior tactical resilience, though environmental friction may still impact outcomes.`;
-
-    if (process.env.GEMINI_API_KEY) {
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-2.5-flash',
-        systemInstruction: systemInstruction
-      });
-      const response = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json"
-        }
-      });
-      const parsed = JSON.parse(response.response.text());
-      archetype = parsed.archetype;
-      hiddenGrind = parsed.hiddenGrind;
+    // Unified GenAI wrapper normalizes outputs beautifully
+    let outputText = result.text;
+    
+    try {
+        const cleanedMetadata = outputText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const finalJson = JSON.parse(cleanedMetadata);
+        return res.status(200).json({ success: true, data: finalJson });
+    } catch(e) {
+        return res.status(500).json({ error: 'Upstream schema corruption avoiding parsing error bounds' });
     }
-
-    res.json({ success: true, data: { archetype, hiddenGrind } });
 
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    // Graceful degradation per defensive-programming.md
-    res.status(500).json({ error: 'Failed to generate archetype. Please verify GCP permissions or check quota.' });
+    console.error('[PIPELINE ERROR]:', error);
+    return res.status(500).json({ error: 'Internal pipeline failure' });
   }
 });
 

@@ -8,14 +8,16 @@ import VisibilityGapCard from "../components/dashboard/VisibilityGapCard";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(false);
+  const [activeSport, setActiveSport] = useState("wrestling");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [archetype, setArchetype] = useState("INITIALIZING...");
   const [hiddenGrind, setHiddenGrind] = useState("Awaiting narrative telemetry feed. Please activate a sector.");
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (sport: string) => {
+    setActiveSport(sport);
     setLoading(true);
-    setArchetype("PROCESSING DATA...");
-    setHiddenGrind("Scanning bio-mechanical anomalies and archived narrative logs...");
+    setArchetype("EXTRACTING RAW FEEDS...");
+    setHiddenGrind("Scraping live Team USA context URLs and verifying semantic safety bounds...");
     
     // Auto-close menu on mobile when analyzing
     if(isMobileMenuOpen) setIsMobileMenuOpen(false);
@@ -24,7 +26,7 @@ export default function Dashboard() {
       const response = await fetch("http://localhost:4000/api/analyze-sport", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sport: "wrestling" })
+        body: JSON.stringify({ sport: sport })
       });
       
       const resData = await response.json();
@@ -32,12 +34,12 @@ export default function Dashboard() {
         setArchetype(resData.data.archetype);
         setHiddenGrind(resData.data.hiddenGrind);
       } else {
-        setArchetype("ERROR");
-        setHiddenGrind("Failed to parse narrative. Terminal blocked.");
+        setArchetype("CONNECTION ERROR");
+        setHiddenGrind(resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.");
       }
     } catch (err) {
-      setArchetype("CONNECTION FAILED");
-      setHiddenGrind("The API Proxy connection was severed. Please verify GCP permissions.");
+      setArchetype("PROXY DEGRADED");
+      setHiddenGrind("The API Proxy connection was severed or Google Cloud quota breached.");
     } finally {
       setLoading(false);
     }
@@ -47,6 +49,7 @@ export default function Dashboard() {
     <>
       <SideNavBar 
         loading={loading} 
+        activeSport={activeSport}
         onAnalyze={handleAnalyze} 
         isOpen={isMobileMenuOpen} 
         setIsOpen={setIsMobileMenuOpen} 
@@ -62,12 +65,12 @@ export default function Dashboard() {
           <div className="flex gap-8">
             <div>
               <span className="font-mono-data text-[10px] text-slate-500 block">ENCRYPTION</span>
-              <span className="font-mono-data text-xs text-on-surface">AES-256-LEVEL-ALPHA</span>
+              <span className="font-mono-data text-xs text-on-surface">AES-256-LEVEL-[NLP-SCRAPE]</span>
             </div>
           </div>
           <div className="text-left md:text-right">
             <span className="font-mono-data text-[10px] text-slate-500 block uppercase">Engine Profile</span>
-            <span className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface">UNSUNG HEROES ENGINE v2.04</span>
+            <span className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface">UNSUNG HEROES ENGINE v3.00</span>
           </div>
         </div>
 

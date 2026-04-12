@@ -2,12 +2,13 @@ import React from "react";
 
 interface SideNavBarProps {
   loading: boolean;
-  onAnalyze: () => void;
+  activeSport: string;
+  onAnalyze: (sport: string) => void;
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
 }
 
-export default function SideNavBar({ loading, onAnalyze, isOpen, setIsOpen }: SideNavBarProps) {
+export default function SideNavBar({ loading, activeSport, onAnalyze, isOpen, setIsOpen }: SideNavBarProps) {
   return (
     <>
       {/* Mobile Drawer Overlay */}
@@ -35,20 +36,25 @@ export default function SideNavBar({ loading, onAnalyze, isOpen, setIsOpen }: Si
         <nav className="flex-1 space-y-1">
           {/* Active Action Button */}
           <button 
-            onClick={onAnalyze}
+            onClick={() => onAnalyze("wrestling")}
             disabled={loading}
-            className={`w-full text-left group flex items-center px-6 py-3 transition-all duration-100 scale-0.98 text-[#ffba20] font-bold border-l-2 ${loading ? 'border-amber-400 bg-[#131b2e] opacity-70 cursor-wait' : 'border-[#ffba20] hover:bg-[#131b2e]'}`}
+            className={`w-full text-left group flex items-center px-6 py-3 transition-all duration-100 scale-0.98 font-bold border-l-2 ${loading && activeSport === 'wrestling' ? 'border-amber-400 bg-[#131b2e] opacity-70 cursor-wait text-[#ffba20]' : activeSport === 'wrestling' ? 'border-[#ffba20] bg-[#131b2e] text-[#ffba20]' : 'border-transparent text-slate-400 hover:text-[#ffba20] hover:bg-[#131b2e]/50'}`}
           >
             <span className="material-symbols-outlined mr-4">sports_kabaddi</span>
             <span className="font-headline tracking-tighter uppercase">Wrestling</span>
           </button>
           
-          {/* Inactive Mocks */}
-          <button disabled className="w-full text-left group flex items-center px-6 py-3 text-slate-500 font-mono-data text-xs uppercase opacity-50 cursor-not-allowed">
+          <button 
+            onClick={() => onAnalyze("goalball")}
+            disabled={loading}
+            className={`w-full text-left group flex items-center px-6 py-3 transition-all duration-100 scale-0.98 font-bold border-l-2 ${loading && activeSport === 'goalball' ? 'border-amber-400 bg-[#131b2e] opacity-70 cursor-wait text-[#ffba20]' : activeSport === 'goalball' ? 'border-[#ffba20] bg-[#131b2e] text-[#ffba20]' : 'border-transparent text-slate-400 hover:text-[#ffba20] hover:bg-[#131b2e]/50'}`}
+          >
             <span className="material-symbols-outlined mr-4">sports_volleyball</span>
-            <span>Goalball</span>
+            <span className="font-headline tracking-tighter uppercase">Goalball</span>
           </button>
-          <button disabled className="w-full text-left group flex items-center px-6 py-3 text-slate-500 font-mono-data text-xs uppercase opacity-50 cursor-not-allowed">
+
+          {/* Inactive Mocks */}
+          <button disabled className="w-full text-left group flex items-center px-6 py-3 text-slate-500 font-mono-data text-xs uppercase opacity-20 cursor-not-allowed">
             <span className="material-symbols-outlined mr-4">sports_martial_arts</span>
             <span>Judo</span>
           </button>

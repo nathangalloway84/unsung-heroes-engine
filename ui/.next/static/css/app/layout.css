@@ -521,6 +521,9 @@
   .border-secondary-container {
     border-color: var(--color-secondary-container);
   }
+  .border-transparent {
+    border-color: transparent;
+  }
   .bg-\[\#0b1326\] {
     background-color: #0b1326;
   }
@@ -724,6 +727,9 @@
   .opacity-10 {
     opacity: 10%;
   }
+  .opacity-20 {
+    opacity: 20%;
+  }
   .opacity-50 {
     opacity: 50%;
   }
@@ -786,6 +792,20 @@
     &:hover {
       @media (hover: hover) {
         background-color: #131b2e;
+      }
+    }
+  }
+  .hover\:bg-\[\#131b2e\]\/50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, #131b2e 50%, transparent);
+      }
+    }
+  }
+  .hover\:text-\[\#ffba20\] {
+    &:hover {
+      @media (hover: hover) {
+        color: #ffba20;
       }
     }
   }
