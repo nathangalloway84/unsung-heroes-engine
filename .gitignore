@@ -1,0 +1,16 @@
+# Development
+node_modules/
+.env
+dist/
+build/
+coverage/
+.DS_Store
+
+# Virtual Environments (Python Backend)
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Local Governance Configuration (Do Not Track in public repo)
+.agents/
