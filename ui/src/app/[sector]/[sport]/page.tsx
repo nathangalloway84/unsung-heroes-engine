@@ -6,6 +6,7 @@ import VisibilityGapCard from "@/components/dashboard/VisibilityGapCard";
 import { useParams } from "next/navigation";
 import { useTelemetryCache } from "@/components/providers/TelemetryProvider";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SportDashboard() {
   const params = useParams();
@@ -158,17 +159,17 @@ export default function SportDashboard() {
           </div>
         </div>
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-           <select 
-              value={selectedHurdle}
-              onChange={(e) => setSelectedHurdle(e.target.value)}
-              disabled={isLoading}
-              className="bg-[#111827] border border-outline-variant/30 text-[#d5c4ab] font-body text-xs px-3 py-2 focus:ring-[#ffba20] focus:border-[#ffba20] outline-none transition-all cursor-pointer disabled:opacity-50 max-w-[300px]"
-            >
-              <option value="">Baseline Projection</option>
-              <option value="Lost Primary Grassroots Sponsor">Lost Primary Sponsor</option>
-              <option value="Catastrophic Knee Injury (9-month recovery)">Catastrophic Injury (9mo)</option>
-              <option value="Training Facility Relocated 1,000 miles away">Facility Relocated (1,000mi)</option>
-           </select>
+           <Select value={selectedHurdle || "none"} onValueChange={(val) => setSelectedHurdle(val === "none" ? "" : val)} disabled={isLoading}>
+             <SelectTrigger className="w-[300px] bg-[#111827] border-outline-variant/30 text-[#d5c4ab] font-body text-xs focus:ring-[#ffba20] rounded-none">
+               <SelectValue placeholder="Baseline Projection" />
+             </SelectTrigger>
+             <SelectContent className="bg-[#111827] border-outline-variant/30 text-[#d5c4ab] font-body text-xs rounded-none">
+               <SelectItem value="none">Baseline Projection</SelectItem>
+               <SelectItem value="Lost Primary Grassroots Sponsor">Lost Primary Sponsor</SelectItem>
+               <SelectItem value="Catastrophic Knee Injury (9-month recovery)">Catastrophic Injury (9mo)</SelectItem>
+               <SelectItem value="Training Facility Relocated 1,000 miles away">Facility Relocated (1,000mi)</SelectItem>
+             </SelectContent>
+           </Select>
            <button 
              onClick={() => setForceSyncTrigger(prev => prev + 1)}
              disabled={isLoading}
@@ -179,7 +180,7 @@ export default function SportDashboard() {
         </div>
       </div>
 
-      <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />
+      <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} hurdleActive={!!selectedHurdle} />
       <VisibilityGapCard activeSport={sport} visibilityGapInsight={visibilityGapInsight} loading={isLoading} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">

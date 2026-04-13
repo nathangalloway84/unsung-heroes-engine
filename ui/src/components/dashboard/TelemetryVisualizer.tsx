@@ -41,6 +41,7 @@ interface TelemetryVisualizerProps {
   telemetryData?: any[];
   sport?: string;
   activeSources?: string[];
+  hurdleActive?: boolean;
 }
 
 const chartConfig = {
@@ -50,7 +51,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryData = [], sport, activeSources = [] }: TelemetryVisualizerProps) {
+export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryData = [], sport, activeSources = [], hurdleActive = false }: TelemetryVisualizerProps) {
   return (
     <div className="grid grid-cols-12 gap-8 mb-8">
       {/* Narrative Block */}
@@ -103,10 +104,11 @@ export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryDat
                       <Radar
                         name="Sector Strain"
                         dataKey="value"
-                        stroke="#ffba20"
-                        fill="#96ccff"
+                        stroke={hurdleActive ? "#dc2626" : "#ffba20"}
+                        fill={hurdleActive ? "#dc2626" : "#ffba20"}
                         fillOpacity={0.4}
                         isAnimationActive={true}
+                        style={{ transition: 'all 0.5s ease-in-out' }}
                       />
                     </RadarChart>
                   </ChartContainer>
