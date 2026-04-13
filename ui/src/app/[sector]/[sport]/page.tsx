@@ -134,10 +134,6 @@ export default function SportDashboard() {
             <span className="font-mono-data text-xs text-[#ffba20] uppercase font-bold">MODEL: gemini-3-preview</span>
           </div>
         </div>
-        <div className="text-left md:text-right">
-          <span className="font-mono-data text-[10px] text-slate-500 block uppercase tracking-widest">Ingestion Pipeline</span>
-          <span className="font-headline text-sm font-bold uppercase tracking-widest text-[#96ccff]">SOURCE: teamusa.com scraper</span>
-        </div>
       </div>
 
       <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />
