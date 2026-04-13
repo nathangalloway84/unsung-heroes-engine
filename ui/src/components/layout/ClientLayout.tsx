@@ -25,7 +25,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <SideNavBar 
-        activeSector={sector}
+        activeSector={activeSector}
         activeSport={sport}
         isOpen={isMobileMenuOpen} 
         setIsOpen={setIsMobileMenuOpen} 
