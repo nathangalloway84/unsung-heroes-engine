@@ -74,6 +74,8 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(response.body.success).toBe(true);
         expect(response.body.data.archetype).toBe("THE LEVERAGED SURVIVOR");
         expect(response.body.data.telemetryData).toBeDefined();
+        expect(response.body.metadata.activeSources).toBeDefined();
+        expect(response.body.metadata.activeSources.length).toBe(3);
         expect(response.body.data.telemetryData[0].name).toBe("Media Visibility Index");
         // Verify we pinged the identical valid URL footprint sequentially hitting 3 explicit topologies natively
         expect(global.fetch).toHaveBeenCalledTimes(3);

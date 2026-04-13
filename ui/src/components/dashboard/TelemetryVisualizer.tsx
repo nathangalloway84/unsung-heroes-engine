@@ -39,6 +39,8 @@ interface TelemetryVisualizerProps {
   hiddenGrind: string;
   loading: boolean;
   telemetryData?: any[];
+  sport?: string;
+  activeSources?: string[];
 }
 
 const chartConfig = {
@@ -48,7 +50,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryData = [] }: TelemetryVisualizerProps) {
+export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryData = [], sport, activeSources = [] }: TelemetryVisualizerProps) {
   return (
     <div className="grid grid-cols-12 gap-8 mb-8">
       {/* Narrative Block */}
@@ -73,7 +75,9 @@ export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryDat
               <div className="w-2 h-2 bg-[#ffba20] rounded-full opacity-50"></div>
               <div className="w-2 h-2 bg-secondary rounded-full opacity-50"></div>
             </div>
-            <span className="font-mono-data text-[10px] text-slate-400 font-bold">DATA_VIZ_FEED_LIVE // AUTH_REQ</span>
+            <span className="font-mono-data text-[10px] text-slate-400 font-bold">
+              {sport && !loading && telemetryData.length > 0 ? `DATA_VIZ // SOURCES: ${activeSources.join(", ")}` : 'DATA_VIZ // STANDBY'}
+            </span>
           </div>
           
           <div className="flex-1 p-8 flex flex-col justify-center items-center relative">

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SPORTS_CONFIG } from "@/config/sports";
+import { useTelemetryCache } from "@/components/providers/TelemetryProvider";
 
 interface SideNavBarProps {
   activeSector: string;
@@ -14,6 +15,7 @@ interface SideNavBarProps {
 
 export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpen }: SideNavBarProps) {
   const router = useRouter();
+  const { latency } = useTelemetryCache();
   
   const sportsList = SPORTS_CONFIG[activeSector] || SPORTS_CONFIG["paralympics"];
 
@@ -79,7 +81,7 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
             <img alt="User Intelligence Profile" className="w-10 h-10 border border-amber-500/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0spgf-pzUeAea0ILh1f2s6bGghbfEeBO1V6i9Oum8FF6c-jypdgwcHanLi9oZrBdSQNc3f5V4f5nSoW2eySnb5L8V1Pxqml0-vY6SjmhRyWxrMs7RY-9bMCV0Eu_1y5dX5TzjBTpYRRrNO5sdW4_PZI46gGF7Esdpjkq0gb_ElJDzTUgReN3BqlOjMaeqH1TwRF7Aj4Muz4pcF1PxnW1gGb1oqe-nCJKeDnxP17lJo4vdR7xQN6wl1E03TwyYCz9jteLs9UgonU-C"/>
             <div className="overflow-hidden">
               <p className="font-mono-data text-[10px] text-[#ffba20] truncate">AGENT_ALPHA_01</p>
-              <p className="font-mono-data text-[8px] text-slate-500 uppercase">Status: Operational</p>
+              <p className="font-mono-data text-[8px] text-slate-500 uppercase">GEMINI_ENGINE // LATENCY: {latency || "STANDBY"}</p>
             </div>
           </div>
         </div>

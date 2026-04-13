@@ -10,10 +10,11 @@ export default function SportDashboard() {
   const params = useParams();
   const sport = params.sport as string;
   
-  const { cache, setCachePayload, setActiveArchetype, isLoading, setIsLoading } = useTelemetryCache();
+  const { cache, setCachePayload, setActiveArchetype, isLoading, setIsLoading, setLatency } = useTelemetryCache();
   
   const [hiddenGrind, setHiddenGrind] = useState("");
   const [telemetryData, setTelemetryData] = useState<any[]>([]);
+  const [activeSources, setActiveSources] = useState<string[]>([]);
 
   useEffect(() => {
     if (!sport) return;
@@ -22,6 +23,8 @@ export default function SportDashboard() {
       setActiveArchetype(cache[sport].archetype);
       setHiddenGrind(cache[sport].hiddenGrind);
       setTelemetryData(cache[sport].telemetryData);
+      setActiveSources(cache[sport].activeSources || []);
+      setLatency("CACHED");
       return;
     }
 
@@ -29,9 +32,12 @@ export default function SportDashboard() {
 
     const fetchTelemetry = async () => {
       setIsLoading(true);
+      setLatency("COMPUTING...");
+      const startTime = performance.now();
       setActiveArchetype("EXTRACTING RAW FEEDS...");
       setHiddenGrind(`Scraping live Team USA context URLs for ${sport.toUpperCase()} and verifying semantic safety bounds...`);
       setTelemetryData([]);
+      setActiveSources([]);
 
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -42,10 +48,13 @@ export default function SportDashboard() {
         });
         
         const resData = await response.json();
+        const endTime = performance.now();
+        const diff = Math.round(endTime - startTime);
         
         if (!isMounted) return;
 
         if (resData.success) {
+          setLatency(`${diff}ms`);
           const payload = {
             archetype: resData.data.archetype,
             hiddenGrind: resData.data.hiddenGrind,
@@ -53,15 +62,18 @@ export default function SportDashboard() {
               { name: "Synthetic Load (Fallback)", value: 40 },
               { name: "Visibility Block (Fallback)", value: 15 },
               { name: "Financial Strain (Fallback)", value: 85 }
-            ]
+            ],
+            activeSources: resData.metadata?.activeSources || []
           };
           
           setActiveArchetype(payload.archetype);
           setHiddenGrind(payload.hiddenGrind);
           setTelemetryData(payload.telemetryData);
+          setActiveSources(payload.activeSources);
           setCachePayload(sport, payload);
           
         } else {
+          setLatency(`ERROR (${diff}ms)`);
           const payload = {
             archetype: "CONNECTION ERROR",
             hiddenGrind: resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.",
@@ -74,6 +86,10 @@ export default function SportDashboard() {
         }
       } catch (err) {
         if (!isMounted) return;
+        const endTime = performance.now();
+        const diff = Math.round(endTime - startTime);
+        setLatency(`FAILED (${diff}ms)`);
+        
         const degradePayload = {
             archetype: "PROXY DEGRADED",
             hiddenGrind: "The API Proxy connection was severed or Google Cloud quota breached.",
@@ -111,7 +127,7 @@ export default function SportDashboard() {
         </div>
       </div>
 
-      <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} />
+      <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />
       <VisibilityGapCard activeSport={sport} />
     </main>
   );

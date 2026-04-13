@@ -41,9 +41,12 @@ app.post('/api/analyze-sport', async (req, res) => {
         return res.status(500).json({ error: 'Upstream Team USA feed unavailable or blocking connections.' });
     }
 
+    const activeSources = [];
+
     // Cheerio Scraper executing isolated extractions securely guarding node windows
-    const scrapeHtml = async (responseObj) => {
+    const scrapeHtml = async (responseObj, url) => {
        if (responseObj.status === 'fulfilled' && responseObj.value.ok) {
+          activeSources.push(url);
           const html = await responseObj.value.text();
           const $ = cheerio.load(html);
           return $('p').text().substring(0, 2000); 
@@ -51,9 +54,9 @@ app.post('/api/analyze-sport', async (req, res) => {
        return "DATA DEGRADED. TARGET SEVERED OR UNREACHABLE.";
     };
 
-    const newsData = await scrapeHtml(responses[0]);
-    const athletesData = await scrapeHtml(responses[1]);
-    const aboutData = await scrapeHtml(responses[2]);
+    const newsData = await scrapeHtml(responses[0], targetUrls[0]);
+    const athletesData = await scrapeHtml(responses[1], targetUrls[1]);
+    const aboutData = await scrapeHtml(responses[2], targetUrls[2]);
 
     if (!process.env.GCP_PROJECT_ID || !process.env.VERTEX_LOCATION) {
       return res.status(500).json({ error: 'Failed to generate archetype. Please verify GCP Environment bindings (.env).' });
@@ -96,7 +99,11 @@ app.post('/api/analyze-sport', async (req, res) => {
     try {
         const cleanedMetadata = outputText.replace(/```json/g, '').replace(/```/g, '').trim();
         const finalJson = JSON.parse(cleanedMetadata);
-        return res.status(200).json({ success: true, data: finalJson });
+        return res.status(200).json({ 
+             success: true, 
+             data: finalJson,
+             metadata: { activeSources }
+        });
     } catch(e) {
         return res.status(500).json({ error: 'Upstream schema corruption avoiding parsing error bounds', debug: outputText });
     }
