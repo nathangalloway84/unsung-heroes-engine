@@ -15,8 +15,8 @@ fi
 # Load variables natively handling empty mappings cleanly
 export $(grep -v '^#' .env.production | xargs)
 
-if [ -z "$GCP_PROJECT_ID" ] || [ -z "$VERTEX_LOCATION" ] || [ -z "$SERVICE_ACCOUNT_NAME" ]; then
-  echo "[ERROR] GCP_PROJECT_ID, VERTEX_LOCATION, and SERVICE_ACCOUNT_NAME must be defined in .env.production."
+if [ -z "$GCP_PROJECT_ID" ] || [ -z "$VERTEX_LOCATION" ] || [ -z "$SERVICE_ACCOUNT_NAME" ] || [ -z "$API_SERVICE_NAME" ] || [ -z "$UI_SERVICE_NAME" ]; then
+  echo "[ERROR] GCP_PROJECT_ID, VERTEX_LOCATION, SERVICE_ACCOUNT_NAME, API_SERVICE_NAME, and UI_SERVICE_NAME must be defined in .env.production."
   exit 1
 fi
 
@@ -47,18 +47,18 @@ gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" \
 
 # 3. Deploy API securely masked behind the explicit Identity
 echo "[3/5] Deploying /api workspace securely wrapping explicit Service Account..."
-gcloud run deploy unsung-api \
+gcloud run deploy $API_SERVICE_NAME \
   --source ./api \
   --allow-unauthenticated \
   --region us-central1 \
   --project $GCP_PROJECT_ID \
   --service-account="$SA_EMAIL" \
-  --set-env-vars GCP_PROJECT_ID=$GCP_PROJECT_ID,VERTEX_LOCATION=$VERTEX_LOCATION \
+  --update-env-vars GCP_PROJECT_ID=$GCP_PROJECT_ID,VERTEX_LOCATION=$VERTEX_LOCATION \
   --quiet
 
 # 4. Harvest API URL
 echo "[4/5] Harvesting API Gateway Service URL..."
-API_URL=$(gcloud run services describe unsung-api --platform managed --region us-central1 --project $GCP_PROJECT_ID --format 'value(status.url)')
+API_URL=$(gcloud run services describe $API_SERVICE_NAME --platform managed --region us-central1 --project $GCP_PROJECT_ID --format 'value(status.url)')
 
 if [ -z "$API_URL" ]; then
   echo "[ERROR] Failed to harvest the Cloud Run API URL."
@@ -69,12 +69,12 @@ echo "      -> API URL Extracted: $API_URL"
 
 # 5. Deploy UI with injected API URL
 echo "[5/5] Deploying /ui workspace and securely injecting dynamic API link..."
-gcloud run deploy unsung-ui \
+gcloud run deploy $UI_SERVICE_NAME \
   --source ./ui \
   --allow-unauthenticated \
   --region us-central1 \
   --project $GCP_PROJECT_ID \
-  --set-env-vars NEXT_PUBLIC_API_URL=$API_URL \
+  --update-env-vars NEXT_PUBLIC_API_URL=$API_URL \
   --quiet
 
 echo "================================================="
