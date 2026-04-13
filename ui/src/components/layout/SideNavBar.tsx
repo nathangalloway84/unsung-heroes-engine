@@ -68,7 +68,7 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
                    setIsCompareMode(!isCompareMode);
                    setCompareSportA("");
                    setCompareSportB("");
-                   if (isCompareMode) router.push('/');
+                   if (isCompareMode) router.push(`/${activeSector}`);
                 }}
                 className={`font-mono-data text-[10px] tracking-widest uppercase p-2 border transition-all ${isCompareMode ? 'bg-[#ffba20] text-black border-[#ffba20]' : 'bg-transparent text-slate-500 border-outline-variant/30 hover:text-[#ffba20]'}`}
              >

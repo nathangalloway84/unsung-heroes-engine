@@ -27,6 +27,8 @@ interface TelemetryContextType {
   setCompareSportA: (val: string) => void;
   compareSportB: string;
   setCompareSportB: (val: string) => void;
+  activeSectorTracker: string;
+  setActiveSectorTracker: (val: string) => void;
 }
 
 const TelemetryContext = createContext<TelemetryContextType | undefined>(undefined);
@@ -39,6 +41,7 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [compareSportA, setCompareSportA] = useState("");
   const [compareSportB, setCompareSportB] = useState("");
+  const [activeSectorTracker, setActiveSectorTracker] = useState("olympics");
 
   const setCachePayload = (sportId: string, payload: CachedDossier) => {
     setCache((prev) => ({ ...prev, [sportId]: payload }));
@@ -47,7 +50,8 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   return (
     <TelemetryContext.Provider value={{ 
         cache, setCachePayload, activeArchetype, setActiveArchetype, isLoading, setIsLoading, latency, setLatency,
-        isCompareMode, setIsCompareMode, compareSportA, setCompareSportA, compareSportB, setCompareSportB
+        isCompareMode, setIsCompareMode, compareSportA, setCompareSportA, compareSportB, setCompareSportB,
+        activeSectorTracker, setActiveSectorTracker
     }}>
       {children}
     </TelemetryContext.Provider>
