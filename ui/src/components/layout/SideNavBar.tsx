@@ -26,10 +26,7 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
 
   const handleSectorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSector = e.target.value;
-    const firstSport = SPORTS_CONFIG[newSector]?.[0]?.id || "";
-    if (firstSport) {
-        router.push(`/${newSector}/${firstSport}`);
-    }
+    router.push(`/${newSector}`);
     setIsOpen(false);
   };
 
