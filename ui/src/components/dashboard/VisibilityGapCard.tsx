@@ -2,9 +2,11 @@ import React from "react";
 
 interface VisibilityGapCardProps {
   activeSport?: string;
+  visibilityGapInsight: string;
+  loading: boolean;
 }
 
-export default function VisibilityGapCard({ activeSport }: VisibilityGapCardProps) {
+export default function VisibilityGapCard({ activeSport, visibilityGapInsight, loading }: VisibilityGapCardProps) {
   const displaySport = activeSport ? activeSport.charAt(0).toUpperCase() + activeSport.slice(1) : "monitored";
 
   return (
@@ -18,8 +20,8 @@ export default function VisibilityGapCard({ activeSport }: VisibilityGapCardProp
             <h2 className="font-headline text-5xl font-black uppercase tracking-tighter text-on-surface mb-6">Visibility Gap</h2>
             
             {/* CSS ANIMATION IMPLEMENTED EXPLICITLY HERE VIA TAILWIND V4 RAW CONFIG */}
-            <div className="max-w-2xl text-on-surface-variant font-body leading-relaxed text-base animate-fade-pulse border-l-2 border-outline-variant/30 pl-4">
-              <p>The discrepancy between professional funding and elite performance metrics has reached a <span className="text-[#ffba20] font-bold">Terminal Inflection Point</span>. Athletes in the {displaySport} sector are operating at 140% of standard output with only 22% of the media index visibility.</p>
+            <div className={`max-w-2xl text-on-surface-variant font-body leading-relaxed text-base border-l-2 border-outline-variant/30 pl-4 ${loading ? 'animate-pulse opacity-50' : 'animate-fade-pulse opacity-100'}`}>
+              <p>{visibilityGapInsight}</p>
             </div>
           </div>
         </div>

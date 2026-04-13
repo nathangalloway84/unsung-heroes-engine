@@ -7,6 +7,7 @@ export type CachedDossier = {
   hiddenGrind: string;
   telemetryData: any[];
   activeSources?: string[];
+  visibilityGapInsight: string;
 };
 
 interface TelemetryContextType {

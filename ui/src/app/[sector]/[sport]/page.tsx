@@ -15,6 +15,7 @@ export default function SportDashboard() {
   const [hiddenGrind, setHiddenGrind] = useState("");
   const [telemetryData, setTelemetryData] = useState<any[]>([]);
   const [activeSources, setActiveSources] = useState<string[]>([]);
+  const [visibilityGapInsight, setVisibilityGapInsight] = useState("");
 
   useEffect(() => {
     if (!sport) return;
@@ -24,6 +25,7 @@ export default function SportDashboard() {
       setHiddenGrind(cache[sport].hiddenGrind);
       setTelemetryData(cache[sport].telemetryData);
       setActiveSources(cache[sport].activeSources || []);
+      setVisibilityGapInsight(cache[sport].visibilityGapInsight);
       setLatency("CACHED");
       return;
     }
@@ -38,6 +40,7 @@ export default function SportDashboard() {
       setHiddenGrind(`Scraping live Team USA context URLs for ${sport.toUpperCase()} and verifying semantic safety bounds...`);
       setTelemetryData([]);
       setActiveSources([]);
+      setVisibilityGapInsight("CALCULATING LIVE MEDIA DISCREPANCY...");
 
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -63,13 +66,15 @@ export default function SportDashboard() {
               { name: "Visibility Block (Fallback)", value: 15 },
               { name: "Financial Strain (Fallback)", value: 85 }
             ],
-            activeSources: resData.metadata?.activeSources || []
+            activeSources: resData.metadata?.activeSources || [],
+            visibilityGapInsight: resData.data.visibilityGapInsight || "Visibility limits calculated offline."
           };
           
           setActiveArchetype(payload.archetype);
           setHiddenGrind(payload.hiddenGrind);
           setTelemetryData(payload.telemetryData);
           setActiveSources(payload.activeSources);
+          setVisibilityGapInsight(payload.visibilityGapInsight);
           setCachePayload(sport, payload);
           
         } else {
@@ -77,11 +82,15 @@ export default function SportDashboard() {
           const payload = {
             archetype: "CONNECTION ERROR",
             hiddenGrind: resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.",
-            telemetryData: []
+            telemetryData: [],
+            activeSources: [],
+            visibilityGapInsight: "FAILED TO COMPILE DUE TO UPSTREAM INVERSION."
           };
           setActiveArchetype(payload.archetype);
           setHiddenGrind(payload.hiddenGrind);
           setTelemetryData(payload.telemetryData);
+          setActiveSources(payload.activeSources);
+          setVisibilityGapInsight(payload.visibilityGapInsight);
           setCachePayload(sport, payload);
         }
       } catch (err) {
@@ -93,11 +102,15 @@ export default function SportDashboard() {
         const degradePayload = {
             archetype: "PROXY DEGRADED",
             hiddenGrind: "The API Proxy connection was severed or Google Cloud quota breached.",
-            telemetryData: []
+            telemetryData: [],
+            activeSources: [],
+            visibilityGapInsight: "PROXY DEGRADED - VISIBILITY UNKNOWN."
         };
         setActiveArchetype(degradePayload.archetype);
         setHiddenGrind(degradePayload.hiddenGrind);
         setTelemetryData(degradePayload.telemetryData);
+        setActiveSources(degradePayload.activeSources);
+        setVisibilityGapInsight(degradePayload.visibilityGapInsight);
         setCachePayload(sport, degradePayload);
       } finally {
         if (isMounted) setIsLoading(false);
@@ -128,7 +141,7 @@ export default function SportDashboard() {
       </div>
 
       <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />
-      <VisibilityGapCard activeSport={sport} />
+      <VisibilityGapCard activeSport={sport} visibilityGapInsight={visibilityGapInsight} loading={isLoading} />
     </main>
   );
 }

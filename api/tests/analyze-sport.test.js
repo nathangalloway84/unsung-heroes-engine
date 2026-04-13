@@ -8,7 +8,7 @@ jest.mock('@google/genai', () => {
       return {
         models: {
           generateContent: jest.fn().mockResolvedValue({
-            text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}"
+            text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"visibilityGapInsight\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}"
           })
         }
       };
@@ -73,6 +73,7 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
         expect(response.body.data.archetype).toBe("THE LEVERAGED SURVIVOR");
+        expect(response.body.data.visibilityGapInsight).toBeDefined();
         expect(response.body.data.telemetryData).toBeDefined();
         expect(response.body.metadata.activeSources).toBeDefined();
         expect(response.body.metadata.activeSources.length).toBe(3);
