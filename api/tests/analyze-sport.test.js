@@ -107,6 +107,32 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(global.fetch).toHaveBeenCalledTimes(3);
         expect(mockDocSet).toHaveBeenCalled();
     });
+
+    it('Should process interactive real-world catastrophes without breaking conditional or NIL bounds', async () => {
+        mockDocGet.mockResolvedValue({ exists: false }); 
+        
+        global.fetch = jest.fn()
+          .mockResolvedValue({
+            ok: true,
+            text: jest.fn().mockResolvedValue('<p>Force sync catastrophe scrape.</p>')
+          });
+
+        const response = await request(app)
+            .post('/api/analyze-sport')
+            .send({ 
+                sport: 'wrestling', 
+                forceSync: true, 
+                hurdle: 'Catastrophic Knee Injury (9-month recovery)' 
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.body.cached).toBe(false); 
+        // Prove NIL Ban is maintained
+        expect(response.body.data.hiddenGrind).not.toMatch(/John Doe|specific athlete/i);
+        // Prove Conditional phrasing is intact despite the explicit strict catastrophic prompt
+        expect(response.body.data.hiddenGrind).toMatch(/could|might|may/i);
+        expect(response.body.data.physicalTollProfile).toMatch(/might|could|may/i);
+    });
   });
 
   describe('NIL Compliance & Pipeline Routing', () => {

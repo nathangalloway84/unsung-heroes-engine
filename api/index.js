@@ -1,11 +1,11 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const { z } = require('zod');
 const cheerio = require('cheerio');
 const { GoogleGenAI } = require('@google/genai');
 const { Firestore } = require('@google-cloud/firestore');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -23,7 +23,8 @@ app.use('/api/compare-sports', compareRouter);
 // Strict string guard keeping injection requests isolated natively mapping dynamic bounds
 const requestSchema = z.object({
   sport: z.string(),
-  forceSync: z.boolean().optional()
+  forceSync: z.boolean().optional(),
+  hurdle: z.string().optional()
 });
 
 const geminiResponseSchema = z.object({
@@ -43,7 +44,7 @@ app.post('/api/analyze-sport', async (req, res) => {
       return res.status(400).json({ error: 'Invalid payload', details: parsed.error.issues });
     }
     
-    const { sport, forceSync } = parsed.data;
+    const { sport, forceSync, hurdle } = parsed.data;
 
     const docRef = firestore.collection('dossiers').doc(sport);
 
@@ -98,6 +99,8 @@ app.post('/api/analyze-sport', async (req, res) => {
         location: process.env.VERTEX_LOCATION
     });
 
+    const hurdleContext = hurdle ? `\n      CRITICAL RULE 7: You MUST heavily weigh the following catastrophic event into ALL calculated metrics and narratives: "${hurdle}". Specifically evaluate how this event distorts physical strain, financial thresholds, and public visibility safely within the absolute bounds of conditional formatting and the NIL ban.` : ``;
+
     // Defensive System Injection verifying SDLC Guardrails natively over the unstructured data
     const systemInstruction = `
       You are an expert sports analyst focused on the "Hidden Grind" of non-mainstream sports.
@@ -106,7 +109,7 @@ app.post('/api/analyze-sport', async (req, res) => {
       CRITICAL RULE 3: You MUST conceptually synthesize 3-5 structural metrics from the text, returning them as a telemetryData array. These metrics must protect the NIL ban by measuring generalized, inferred systemic concepts mapped mathematically from 0-100.
       CRITICAL RULE 4: You MUST generate a "visibilityGapInsight" string mapping conditional metrics analyzing the scraped data. It must highlight the discrepancy between the sport's grueling realities and its lack of mainstream coverage. This insight MUST strictly use conditional phrasing (e.g., "The lack of mainstream news coverage could isolate these athletes...") and maintain the NIL ban.
       CRITICAL RULE 5: Synthesize a "physicalTollProfile" string detailing an aggregate analysis of bodily strains and physical archetypes gracefully natively. Maintain NIL ban and conditionality.
-      CRITICAL RULE 6: Synthesize a "tippingPoint" string isolating the financial, emotional, or physical threshold where Olympic dreams are commonly abandoned. Maintain strict conditionality safely manually natively.
+      CRITICAL RULE 6: Synthesize a "tippingPoint" string isolating the financial, emotional, or physical threshold where Olympic dreams are commonly abandoned. Maintain strict conditionality safely manually natively.${hurdleContext}
       You MUST integrate demographic trends and donor-funded financial impact realities into the analysis based on the auxiliary feeds provided.
       Return valid JSON in this exact structure: {"archetype": "STRING MAX 4 WORDS", "hiddenGrind": "STRING MAXIMUM 3 SENTENCES", "visibilityGapInsight": "STRING MAXIMUM 3 SENTENCES", "physicalTollProfile": "STRING MAXIMUM 3 SENTENCES", "tippingPoint": "STRING MAXIMUM 3 SENTENCES", "telemetryData": [{"name": "string", "value": number}]}
       

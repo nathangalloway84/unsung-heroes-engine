@@ -20,6 +20,7 @@ export default function SportDashboard() {
   const [physicalTollProfile, setPhysicalTollProfile] = useState("");
   const [tippingPoint, setTippingPoint] = useState("");
   const [forceSyncTrigger, setForceSyncTrigger] = useState(0);
+  const [selectedHurdle, setSelectedHurdle] = useState<string>("");
 
   useEffect(() => {
     if (!sport) return;
@@ -57,7 +58,7 @@ export default function SportDashboard() {
         const response = await fetch(`${apiUrl}/api/analyze-sport`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sport: sport, forceSync: isForceSync })
+          body: JSON.stringify({ sport: sport, forceSync: isForceSync, hurdle: selectedHurdle || undefined })
         });
         
         const resData = await response.json();
@@ -156,13 +157,26 @@ export default function SportDashboard() {
             <span className="font-mono-data text-xs text-[#ffba20] uppercase font-bold">MODEL: gemini-3-preview</span>
           </div>
         </div>
-        <button 
-          onClick={() => setForceSyncTrigger(prev => prev + 1)}
-          disabled={isLoading}
-          className="px-4 py-2 bg-transparent border border-[#ffba20] text-[#ffba20] font-mono-data text-[10px] uppercase tracking-widest hover:bg-[#ffba20] hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Run Live Analysis
-        </button>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+           <select 
+              value={selectedHurdle}
+              onChange={(e) => setSelectedHurdle(e.target.value)}
+              disabled={isLoading}
+              className="bg-[#111827] border border-outline-variant/30 text-[#d5c4ab] font-body text-xs px-3 py-2 focus:ring-[#ffba20] focus:border-[#ffba20] outline-none transition-all cursor-pointer disabled:opacity-50 max-w-[300px]"
+            >
+              <option value="">Baseline Projection</option>
+              <option value="Lost Primary Grassroots Sponsor">Lost Primary Sponsor</option>
+              <option value="Catastrophic Knee Injury (9-month recovery)">Catastrophic Injury (9mo)</option>
+              <option value="Training Facility Relocated 1,000 miles away">Facility Relocated (1,000mi)</option>
+           </select>
+           <button 
+             onClick={() => setForceSyncTrigger(prev => prev + 1)}
+             disabled={isLoading}
+             className="px-4 py-2 bg-[#ffba20]/10 border border-[#ffba20] text-[#ffba20] font-mono-data text-[10px] uppercase tracking-widest hover:bg-[#ffba20] hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+           >
+             Inject Bounds
+           </button>
+        </div>
       </div>
 
       <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />
