@@ -17,7 +17,7 @@ export default function RootPage() {
       </div>
 
       <div className="bg-surface-container-low p-8 relative shadow-lg border border-outline-variant/30 mt-8">
-         <h2 className="font-headline text-3xl font-black uppercase tracking-tighter mb-6 text-on-surface border-l-4 border-[#ffba20] pl-4">Systemic Discrepancy Matrix</h2>
+         <h2 className="font-headline text-3xl font-black uppercase tracking-tighter mb-6 text-on-surface border-l-4 border-[#ffba20] pl-4">The Resilience Matrix</h2>
          <div className="w-full h-[400px]">
            <ResponsiveContainer width="100%" height={400}>
              <BarChart data={aggregatedData}>
