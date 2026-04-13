@@ -1,6 +1,7 @@
 import "./globals.css";
 import React from "react";
 import { TelemetryProvider } from "@/components/providers/TelemetryProvider";
+import ClientLayout from "@/components/layout/ClientLayout";
 
 export const metadata = {
   title: "Unsung Heroes Engine",
@@ -20,7 +21,9 @@ export default function RootLayout({
       </head>
       <body className="overflow-hidden bg-[#0b1326] text-[#dae2fd]">
         <TelemetryProvider>
-          {children}
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </TelemetryProvider>
       </body>
     </html>

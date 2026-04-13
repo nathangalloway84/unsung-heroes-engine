@@ -5,11 +5,11 @@ import SideNavBar from "@/components/layout/SideNavBar";
 import TopNavBar from "@/components/layout/TopNavBar";
 import { useParams } from "next/navigation";
 
-export default function SectorLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const params = useParams();
-  const sector = (params.sector as string) || "paralympics";
-  const sport = (params.sport as string) || "";
+  const sector = (params?.sector as string) || "paralympics";
+  const sport = (params?.sport as string) || "";
 
   return (
     <>
