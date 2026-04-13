@@ -8,10 +8,10 @@ import VisibilityGapCard from "../components/dashboard/VisibilityGapCard";
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(false);
-  const [activeSport, setActiveSport] = useState("wrestling");
+  const [activeSport, setActiveSport] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [archetype, setArchetype] = useState("INITIALIZING...");
-  const [hiddenGrind, setHiddenGrind] = useState("Awaiting narrative telemetry feed. Please activate a sector.");
+  const [archetype, setArchetype] = useState("MISSION BRIEFING");
+  const [hiddenGrind, setHiddenGrind] = useState("The Unsung Heroes Engine is an AI-powered telemetry dashboard designed to illuminate the hidden realities, financial strains, and extreme sacrifices of Team USA's Olympic and Paralympic athletes operating outside the mainstream media spotlight. Select a sector to initialize the data stream.");
 
   const handleAnalyze = async (sport: string) => {
     setActiveSport(sport);
@@ -57,7 +57,8 @@ export default function Dashboard() {
       />
       <TopNavBar 
         archetype={archetype} 
-        loading={loading} 
+        loading={loading}
+        activeSport={activeSport} 
         toggleMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
       />
 
@@ -76,7 +77,7 @@ export default function Dashboard() {
         </div>
 
         <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={loading} />
-        <VisibilityGapCard />
+        <VisibilityGapCard activeSport={activeSport} />
       </main>
     </>
   );

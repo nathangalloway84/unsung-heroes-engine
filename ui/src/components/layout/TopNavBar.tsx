@@ -3,10 +3,11 @@ import React from "react";
 interface TopNavBarProps {
   archetype: string;
   loading: boolean;
+  activeSport?: string;
   toggleMenu: () => void;
 }
 
-export default function TopNavBar({ archetype, loading, toggleMenu }: TopNavBarProps) {
+export default function TopNavBar({ archetype, loading, activeSport, toggleMenu }: TopNavBarProps) {
   return (
     <header className="fixed top-0 right-0 left-0 lg:left-64 z-30 flex justify-between items-center px-4 md:px-8 h-16 bg-[#0b1326]/60 backdrop-blur-md border-b border-[#514532] transition-all">
       <div className="flex items-center gap-4 md:gap-8">
@@ -18,7 +19,7 @@ export default function TopNavBar({ archetype, loading, toggleMenu }: TopNavBarP
         </button>
         <div className="flex flex-col hidden sm:flex">
           <span className="font-mono-data text-[10px] text-slate-500 tracking-tighter uppercase">Subject_Focus</span>
-          <span className="text-[#ffba20] font-headline text-lg uppercase tracking-tight">Wrestling</span>
+          <span className="text-[#ffba20] font-headline text-lg uppercase tracking-tight">{activeSport ? activeSport : "OVERVIEW"}</span>
         </div>
       </div>
       <div className="flex items-center gap-6">
