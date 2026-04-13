@@ -14,7 +14,7 @@ app.use(express.json());
 
 // Strict enum guard keeping injection requests isolated
 const requestSchema = z.object({
-  sport: z.enum(['wrestling', 'goalball'])
+  sport: z.enum(['wrestling', 'judo', 'breaking', 'goalball', 'wheelchair-rugby', 'boccia'])
 });
 
 app.post('/api/analyze-sport', async (req, res) => {

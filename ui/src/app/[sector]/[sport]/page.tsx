@@ -62,13 +62,27 @@ export default function SportDashboard() {
           setCachePayload(sport, payload);
           
         } else {
-          setActiveArchetype("CONNECTION ERROR");
-          setHiddenGrind(resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.");
+          const payload = {
+            archetype: "CONNECTION ERROR",
+            hiddenGrind: resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.",
+            telemetryData: []
+          };
+          setActiveArchetype(payload.archetype);
+          setHiddenGrind(payload.hiddenGrind);
+          setTelemetryData(payload.telemetryData);
+          setCachePayload(sport, payload);
         }
       } catch (err) {
         if (!isMounted) return;
-        setActiveArchetype("PROXY DEGRADED");
-        setHiddenGrind("The API Proxy connection was severed or Google Cloud quota breached.");
+        const degradePayload = {
+            archetype: "PROXY DEGRADED",
+            hiddenGrind: "The API Proxy connection was severed or Google Cloud quota breached.",
+            telemetryData: []
+        };
+        setActiveArchetype(degradePayload.archetype);
+        setHiddenGrind(degradePayload.hiddenGrind);
+        setTelemetryData(degradePayload.telemetryData);
+        setCachePayload(sport, degradePayload);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -79,7 +93,8 @@ export default function SportDashboard() {
     return () => {
       isMounted = false;
     };
-  }, [sport, cache, setCachePayload, setActiveArchetype, setIsLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sport]);
 
   return (
     <main className="ml-0 lg:ml-64 mt-16 p-4 lg:p-8 h-[calc(100vh-64px)] overflow-y-auto bg-background transition-all">
