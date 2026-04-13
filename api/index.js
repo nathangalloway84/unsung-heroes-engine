@@ -3,6 +3,7 @@ const cors = require('cors');
 const { z } = require('zod');
 const cheerio = require('cheerio');
 const { GoogleGenAI } = require('@google/genai');
+const { Firestore } = require('@google-cloud/firestore');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
@@ -12,12 +13,17 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+const firestore = new Firestore({
+  projectId: process.env.GCP_PROJECT_ID || 'unsung-heroes-engine'
+});
+
 const compareRouter = require('./routes/compare');
 app.use('/api/compare-sports', compareRouter);
 
 // Strict string guard keeping injection requests isolated natively mapping dynamic bounds
 const requestSchema = z.object({
-  sport: z.string()
+  sport: z.string(),
+  forceSync: z.boolean().optional()
 });
 
 const geminiResponseSchema = z.object({
@@ -37,7 +43,18 @@ app.post('/api/analyze-sport', async (req, res) => {
       return res.status(400).json({ error: 'Invalid payload', details: parsed.error.issues });
     }
     
-    const { sport } = parsed.data;
+    const { sport, forceSync } = parsed.data;
+
+    const docRef = firestore.collection('dossiers').doc(sport);
+
+    if (!forceSync) {
+        const doc = await docRef.get();
+        if (doc.exists) {
+            const cachedData = doc.data();
+            cachedData.cached = true;
+            return res.status(200).json(cachedData);
+        }
+    }
 
     // Upstream Parallel Fetch Adapter gracefully guarding unmapped degradations
     const targetUrls = [
@@ -121,11 +138,15 @@ app.post('/api/analyze-sport', async (req, res) => {
             return res.status(500).json({ error: 'LLM generated structurally invalid JSON array payload.', details: parsedLLM.error.issues });
         }
 
-        return res.status(200).json({ 
+        const payload = { 
              success: true, 
+             cached: false,
              data: parsedLLM.data,
              metadata: { activeSources }
-        });
+        };
+        
+        await docRef.set(payload);
+        return res.status(200).json(payload);
     } catch(e) {
         return res.status(500).json({ error: 'Upstream schema corruption avoiding parsing error bounds', debug: outputText });
     }

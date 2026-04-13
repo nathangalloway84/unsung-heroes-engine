@@ -19,11 +19,14 @@ export default function SportDashboard() {
   const [visibilityGapInsight, setVisibilityGapInsight] = useState("");
   const [physicalTollProfile, setPhysicalTollProfile] = useState("");
   const [tippingPoint, setTippingPoint] = useState("");
+  const [forceSyncTrigger, setForceSyncTrigger] = useState(0);
 
   useEffect(() => {
     if (!sport) return;
 
-    if (cache[sport]) {
+    const isForceSync = forceSyncTrigger > 0;
+
+    if (cache[sport] && !isForceSync) {
       setActiveArchetype(cache[sport].archetype);
       setHiddenGrind(cache[sport].hiddenGrind);
       setTelemetryData(cache[sport].telemetryData);
@@ -54,7 +57,7 @@ export default function SportDashboard() {
         const response = await fetch(`${apiUrl}/api/analyze-sport`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sport: sport })
+          body: JSON.stringify({ sport: sport, forceSync: isForceSync })
         });
         
         const resData = await response.json();
@@ -142,7 +145,7 @@ export default function SportDashboard() {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sport]);
+  }, [sport, forceSyncTrigger]);
 
   return (
     <main className="ml-0 lg:ml-64 mt-16 p-4 lg:p-8 h-[calc(100vh-64px)] overflow-y-auto bg-background transition-all">
@@ -153,6 +156,13 @@ export default function SportDashboard() {
             <span className="font-mono-data text-xs text-[#ffba20] uppercase font-bold">MODEL: gemini-3-preview</span>
           </div>
         </div>
+        <button 
+          onClick={() => setForceSyncTrigger(prev => prev + 1)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-transparent border border-[#ffba20] text-[#ffba20] font-mono-data text-[10px] uppercase tracking-widest hover:bg-[#ffba20] hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Run Live Analysis
+        </button>
       </div>
 
       <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />

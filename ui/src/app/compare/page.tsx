@@ -37,10 +37,12 @@ export default function CompareDashboard() {
   const [physicalTollProfileB, setPhysicalTollProfileB] = useState("");
   const [tippingPointB, setTippingPointB] = useState("");
   const [genderParityInsight, setGenderParityInsight] = useState("");
+  const [forceSyncTrigger, setForceSyncTrigger] = useState(0);
 
   useEffect(() => {
     if (!sportA || !sportB) return;
     let isMounted = true;
+    const isForceSync = forceSyncTrigger > 0;
     
     const fetchCompare = async () => {
       setIsLoading(true);
@@ -56,7 +58,7 @@ export default function CompareDashboard() {
         const response = await fetch(`${apiUrl}/api/compare-sports`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sportA, sportB })
+          body: JSON.stringify({ sportA, sportB, forceSync: isForceSync })
         });
         const resData = await response.json();
         
@@ -87,7 +89,7 @@ export default function CompareDashboard() {
     
     fetchCompare();
     return () => { isMounted = false; };
-  }, [sportA, sportB]);
+  }, [sportA, sportB, forceSyncTrigger]);
 
   // Safely Zip Arrays matching lengths dynamically natively
   const maxLen = Math.max(telemetryA.length, telemetryB.length);
@@ -99,7 +101,16 @@ export default function CompareDashboard() {
 
   return (
     <main className="ml-0 lg:ml-64 mt-16 p-4 lg:p-8 h-[calc(100vh-64px)] overflow-y-auto bg-background transition-all">
-       <h1 className="font-headline text-5xl font-black uppercase tracking-tighter mb-6 text-on-surface border-l-4 border-[#ff453a] pl-4">Parity Engine</h1>
+       <div className="flex justify-between items-center mb-6 border-l-4 border-[#ff453a] pl-4">
+         <h1 className="font-headline text-5xl font-black uppercase tracking-tighter text-on-surface">Parity Engine</h1>
+         <button 
+            onClick={() => setForceSyncTrigger(prev => prev + 1)}
+            disabled={isLoading}
+            className="px-4 py-2 bg-transparent border border-[#ff453a] text-[#ff453a] font-mono-data text-[10px] uppercase tracking-widest hover:bg-[#ff453a] hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+         >
+           Run Live Analysis
+         </button>
+       </div>
        
        <div className="grid grid-cols-12 gap-8">
          <section className="col-span-12 lg:col-span-7 bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-lg relative min-h-[400px]">

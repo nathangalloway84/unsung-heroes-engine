@@ -2,12 +2,18 @@ const express = require('express');
 const { z } = require('zod');
 const cheerio = require('cheerio');
 const { GoogleGenAI } = require('@google/genai');
+const { Firestore } = require('@google-cloud/firestore');
 
 const router = express.Router();
 
 const compareRequestSchema = z.object({
   sportA: z.string(),
-  sportB: z.string()
+  sportB: z.string(),
+  forceSync: z.boolean().optional()
+});
+
+const firestore = new Firestore({
+  projectId: process.env.GCP_PROJECT_ID || 'unsung-heroes-engine'
 });
 
 const compareGeminiResponseSchema = z.object({
@@ -29,7 +35,19 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Invalid payload', details: parsed.error.issues });
     }
     
-    const { sportA, sportB } = parsed.data;
+    const { sportA, sportB, forceSync } = parsed.data;
+
+    const docId = [sportA, sportB].sort().join('_vs_');
+    const docRef = firestore.collection('comparisons').doc(docId);
+
+    if (!forceSync) {
+        const doc = await docRef.get();
+        if (doc.exists) {
+            const cachedData = doc.data();
+            cachedData.cached = true;
+            return res.status(200).json(cachedData);
+        }
+    }
 
     const targetUrlsA = [
       `https://www.teamusa.com/news/${sportA}`,
@@ -120,11 +138,15 @@ router.post('/', async (req, res) => {
             return res.status(500).json({ error: 'LLM generated structurally invalid JSON array payload.', details: parsedLLM.error.issues });
         }
 
-        return res.status(200).json({ 
+        const payload = { 
              success: true, 
+             cached: false,
              data: parsedLLM.data,
              metadata: { activeSourcesA, activeSourcesB }
-        });
+        };
+
+        await docRef.set(payload);
+        return res.status(200).json(payload);
     } catch(e) {
         return res.status(500).json({ error: 'Upstream schema corruption avoiding parsing error bounds', debug: outputText });
     }

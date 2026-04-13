@@ -9,6 +9,7 @@ services:
       - "4000:4000"
     environment:
       - PORT=4000
+      - FIRESTORE_EMULATOR_HOST=firestore-emulator:8080
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -26,6 +27,14 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: npm run dev -w ui
+
+  firestore-emulator:
+    image: google/cloud-sdk:emulators
+    command: gcloud beta emulators firestore start --host-port=0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    networks:
+      - default
 
 networks:
   default:

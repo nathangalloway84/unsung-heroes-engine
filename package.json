@@ -6,7 +6,7 @@
     "api"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w api\" \"npm run dev -w ui\"",
+    "dev": "docker-compose up -d firestore-emulator && concurrently \"npm run dev -w api\" \"npm run dev -w ui\"",
     "build": "npm run build -w ui",
     "install:all": "npm install",
     "deploy:production": "bash scripts/deploy.sh"

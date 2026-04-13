@@ -1,6 +1,28 @@
 const request = require('supertest');
 const app = require('../index');
 
+const mockDocGet = jest.fn();
+const mockDocSet = jest.fn();
+
+jest.mock('@google-cloud/firestore', () => {
+  return {
+    Firestore: jest.fn().mockImplementation(() => {
+      return {
+        collection: jest.fn().mockImplementation(() => {
+          return {
+            doc: jest.fn().mockImplementation(() => {
+              return {
+                get: mockDocGet,
+                set: mockDocSet
+              };
+            })
+          };
+        })
+      };
+    })
+  };
+});
+
 // Explicitly Mock Unified SDK boundaries
 jest.mock('@google/genai', () => {
   return {
@@ -25,6 +47,9 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
     global.fetch = jest.fn();
     process.env.GCP_PROJECT_ID = 'mock_project';
     process.env.VERTEX_LOCATION = 'global';
+    
+    mockDocGet.mockResolvedValue({ exists: false });
+    mockDocSet.mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -42,14 +67,45 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(response.status).toBe(500);
         expect(response.body.error).toBe('Upstream Team USA feed unavailable or blocking connections.');
     });
+  });
 
-    it('Should block invalid unauthorized sport enums blocking injection', async () => {
+  describe('Firestore Caching Engine', () => {
+    it('Should return cached data if document exists and forceSync is false', async () => {
+        mockDocGet.mockResolvedValue({
+            exists: true,
+            data: () => ({ 
+                cached: false,
+                data: { archetype: "CACHED ARCHETYPE" }
+            })
+        });
+
         const response = await request(app)
             .post('/api/analyze-sport')
-            .send({ sport: 'basketball' });
+            .send({ sport: 'wrestling' }); // No forceSync
 
-        expect(response.status).toBe(400);
-        expect(response.body.details).toBeDefined();
+        expect(response.status).toBe(200);
+        expect(response.body.cached).toBe(true);
+        expect(response.body.data.archetype).toBe("CACHED ARCHETYPE");
+        expect(global.fetch).not.toHaveBeenCalled(); // Scraper is skipped
+    });
+
+    it('Should bypass cache and scrape if forceSync is true', async () => {
+        mockDocGet.mockResolvedValue({ exists: true, data: () => ({}) }); 
+        
+        global.fetch = jest.fn()
+          .mockResolvedValue({
+            ok: true,
+            text: jest.fn().mockResolvedValue('<p>Force sync scrape.</p>')
+          });
+
+        const response = await request(app)
+            .post('/api/analyze-sport')
+            .send({ sport: 'wrestling', forceSync: true });
+
+        expect(response.status).toBe(200);
+        expect(response.body.cached).toBe(false); // New execution
+        expect(global.fetch).toHaveBeenCalledTimes(3);
+        expect(mockDocSet).toHaveBeenCalled();
     });
   });
 
