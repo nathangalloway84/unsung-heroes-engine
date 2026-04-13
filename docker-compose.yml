@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   api:
@@ -30,6 +29,7 @@ services:
 
   firestore-emulator:
     image: google/cloud-sdk:emulators
+    platform: linux/amd64
     command: gcloud beta emulators firestore start --host-port=0.0.0.0:8080
     ports:
       - "8080:8080"
