@@ -5,6 +5,7 @@ import TelemetryVisualizer from "@/components/dashboard/TelemetryVisualizer";
 import VisibilityGapCard from "@/components/dashboard/VisibilityGapCard";
 import { useParams } from "next/navigation";
 import { useTelemetryCache } from "@/components/providers/TelemetryProvider";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function SportDashboard() {
   const params = useParams();
@@ -16,6 +17,8 @@ export default function SportDashboard() {
   const [telemetryData, setTelemetryData] = useState<any[]>([]);
   const [activeSources, setActiveSources] = useState<string[]>([]);
   const [visibilityGapInsight, setVisibilityGapInsight] = useState("");
+  const [physicalTollProfile, setPhysicalTollProfile] = useState("");
+  const [tippingPoint, setTippingPoint] = useState("");
 
   useEffect(() => {
     if (!sport) return;
@@ -26,6 +29,8 @@ export default function SportDashboard() {
       setTelemetryData(cache[sport].telemetryData);
       setActiveSources(cache[sport].activeSources || []);
       setVisibilityGapInsight(cache[sport].visibilityGapInsight);
+      setPhysicalTollProfile(cache[sport].physicalTollProfile);
+      setTippingPoint(cache[sport].tippingPoint);
       setLatency("CACHED");
       return;
     }
@@ -41,6 +46,8 @@ export default function SportDashboard() {
       setTelemetryData([]);
       setActiveSources([]);
       setVisibilityGapInsight("CALCULATING LIVE MEDIA DISCREPANCY...");
+      setPhysicalTollProfile("SYNTHESIZING PHYSICAL TOLL VECTORS...");
+      setTippingPoint("CALCULATING TIPPING POINT THRESHOLDS...");
 
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -67,7 +74,9 @@ export default function SportDashboard() {
               { name: "Financial Strain (Fallback)", value: 85 }
             ],
             activeSources: resData.metadata?.activeSources || [],
-            visibilityGapInsight: resData.data.visibilityGapInsight || "Visibility limits calculated offline."
+            visibilityGapInsight: resData.data.visibilityGapInsight || "Visibility limits calculated offline.",
+            physicalTollProfile: resData.data.physicalTollProfile || "Toll data degraded offline.",
+            tippingPoint: resData.data.tippingPoint || "Thresholds unavailable."
           };
           
           setActiveArchetype(payload.archetype);
@@ -75,6 +84,8 @@ export default function SportDashboard() {
           setTelemetryData(payload.telemetryData);
           setActiveSources(payload.activeSources);
           setVisibilityGapInsight(payload.visibilityGapInsight);
+          setPhysicalTollProfile(payload.physicalTollProfile);
+          setTippingPoint(payload.tippingPoint);
           setCachePayload(sport, payload);
           
         } else {
@@ -84,13 +95,17 @@ export default function SportDashboard() {
             hiddenGrind: resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.",
             telemetryData: [],
             activeSources: [],
-            visibilityGapInsight: "FAILED TO COMPILE DUE TO UPSTREAM INVERSION."
+            visibilityGapInsight: "FAILED TO COMPILE DUE TO UPSTREAM INVERSION.",
+            physicalTollProfile: "PROXY DEGRADED - TOLL UNKNOWN.",
+            tippingPoint: "PROXY DEGRADED - THRESHOLDS UNKNOWN."
           };
           setActiveArchetype(payload.archetype);
           setHiddenGrind(payload.hiddenGrind);
           setTelemetryData(payload.telemetryData);
           setActiveSources(payload.activeSources);
           setVisibilityGapInsight(payload.visibilityGapInsight);
+          setPhysicalTollProfile(payload.physicalTollProfile);
+          setTippingPoint(payload.tippingPoint);
           setCachePayload(sport, payload);
         }
       } catch (err) {
@@ -104,13 +119,17 @@ export default function SportDashboard() {
             hiddenGrind: "The API Proxy connection was severed or Google Cloud quota breached.",
             telemetryData: [],
             activeSources: [],
-            visibilityGapInsight: "PROXY DEGRADED - VISIBILITY UNKNOWN."
+            visibilityGapInsight: "PROXY DEGRADED - VISIBILITY UNKNOWN.",
+            physicalTollProfile: "PROXY DEGRADED - TOLL UNKNOWN.",
+            tippingPoint: "PROXY DEGRADED - THRESHOLDS UNKNOWN."
         };
         setActiveArchetype(degradePayload.archetype);
         setHiddenGrind(degradePayload.hiddenGrind);
         setTelemetryData(degradePayload.telemetryData);
         setActiveSources(degradePayload.activeSources);
         setVisibilityGapInsight(degradePayload.visibilityGapInsight);
+        setPhysicalTollProfile(degradePayload.physicalTollProfile);
+        setTippingPoint(degradePayload.tippingPoint);
         setCachePayload(sport, degradePayload);
       } finally {
         if (isMounted) setIsLoading(false);
@@ -138,6 +157,36 @@ export default function SportDashboard() {
 
       <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={isLoading} telemetryData={telemetryData} sport={sport} activeSources={activeSources} />
       <VisibilityGapCard activeSport={sport} visibilityGapInsight={visibilityGapInsight} loading={isLoading} />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+         <Card className="bg-[#111827]/80 backdrop-blur border-t-2 border-[#ffba20] shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+               <span className="material-symbols-outlined text-6xl">accessibility_new</span>
+            </div>
+            <CardHeader className="pb-2">
+              <CardTitle className="font-mono-data text-xs uppercase tracking-widest text-slate-500">Physical Toll Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className={`font-body text-sm leading-relaxed text-[#d5c4ab] ${isLoading ? 'animate-pulse opacity-50' : ''}`}>
+                 {physicalTollProfile}
+              </p>
+            </CardContent>
+         </Card>
+
+         <Card className="bg-[#111827]/80 backdrop-blur border-t-2 border-[#ff453a] shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+               <span className="material-symbols-outlined text-6xl">warning</span>
+            </div>
+            <CardHeader className="pb-2">
+              <CardTitle className="font-mono-data text-xs uppercase tracking-widest text-slate-500">Career Tipping Point</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className={`font-body text-sm leading-relaxed text-[#d5c4ab] ${isLoading ? 'animate-pulse opacity-50' : ''}`}>
+                 {tippingPoint}
+              </p>
+            </CardContent>
+         </Card>
+      </div>
     </main>
   );
 }

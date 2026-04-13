@@ -8,6 +8,8 @@ export type CachedDossier = {
   telemetryData: any[];
   activeSources?: string[];
   visibilityGapInsight: string;
+  physicalTollProfile: string;
+  tippingPoint: string;
 };
 
 interface TelemetryContextType {

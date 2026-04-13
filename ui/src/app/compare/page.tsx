@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
 
@@ -31,6 +32,11 @@ export default function CompareDashboard() {
   const [discrepancySynthesis, setDiscrepancySynthesis] = useState("");
   const [telemetryA, setTelemetryA] = useState<any[]>([]);
   const [telemetryB, setTelemetryB] = useState<any[]>([]);
+  const [physicalTollProfileA, setPhysicalTollProfileA] = useState("");
+  const [tippingPointA, setTippingPointA] = useState("");
+  const [physicalTollProfileB, setPhysicalTollProfileB] = useState("");
+  const [tippingPointB, setTippingPointB] = useState("");
+  const [genderParityInsight, setGenderParityInsight] = useState("");
 
   useEffect(() => {
     if (!sportA || !sportB) return;
@@ -39,6 +45,11 @@ export default function CompareDashboard() {
     const fetchCompare = async () => {
       setIsLoading(true);
       setDiscrepancySynthesis("CALCULATING DUAL PARITY BOUNDS...");
+      setPhysicalTollProfileA("CALCULATING...");
+      setTippingPointA("CALCULATING...");
+      setPhysicalTollProfileB("CALCULATING...");
+      setTippingPointB("CALCULATING...");
+      setGenderParityInsight("CALCULATING...");
       
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -52,10 +63,20 @@ export default function CompareDashboard() {
         if (!isMounted) return;
         if (resData.success) {
            setDiscrepancySynthesis(resData.data.discrepancySynthesis);
+           setPhysicalTollProfileA(resData.data.physicalTollProfileA);
+           setTippingPointA(resData.data.tippingPointA);
+           setPhysicalTollProfileB(resData.data.physicalTollProfileB);
+           setTippingPointB(resData.data.tippingPointB);
+           setGenderParityInsight(resData.data.genderParityInsight);
            setTelemetryA(resData.data.telemetryDataA);
            setTelemetryB(resData.data.telemetryDataB);
         } else {
            setDiscrepancySynthesis("FAILED DUE TO SCHEMA LIMITS OR SECURE NULLIFICATIONS.");
+           setPhysicalTollProfileA("NULLIFIED");
+           setTippingPointA("NULLIFIED");
+           setPhysicalTollProfileB("NULLIFIED");
+           setTippingPointB("NULLIFIED");
+           setGenderParityInsight("NULLIFIED");
         }
       } catch(e) {
         if (isMounted) setDiscrepancySynthesis("ERROR RESOLVING PARITY ENGINE");
@@ -112,6 +133,54 @@ export default function CompareDashboard() {
             </div>
          </section>
        </div>
+       
+       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card className="bg-[#111827]/80 backdrop-blur border-l-4 border-[#ffba20] shadow-2xl rounded-none">
+             <CardHeader className="pb-2">
+               <CardTitle className="font-headline text-lg font-black uppercase text-on-surface">Sport A: {sportA}</CardTitle>
+             </CardHeader>
+             <CardContent className="space-y-4 pt-4">
+               <div>
+                  <span className="font-mono-data text-[10px] text-slate-500 block uppercase tracking-widest mb-1">Physical Toll</span>
+                  <p className={`font-body text-sm text-[#d5c4ab] ${isLoading ? 'animate-pulse opacity-50' : ''}`}>{physicalTollProfileA}</p>
+               </div>
+               
+               <div>
+                  <span className="font-mono-data text-[10px] text-slate-500 block uppercase tracking-widest mb-1">Tipping Point</span>
+                  <p className={`font-body text-sm text-[#d5c4ab] ${isLoading ? 'animate-pulse opacity-50' : ''}`}>{tippingPointA}</p>
+               </div>
+             </CardContent>
+          </Card>
+          
+          <Card className="bg-[#111827]/80 backdrop-blur border-l-4 border-[#ff453a] shadow-2xl rounded-none">
+             <CardHeader className="pb-2">
+               <CardTitle className="font-headline text-lg font-black uppercase text-on-surface">Sport B: {sportB}</CardTitle>
+             </CardHeader>
+             <CardContent className="space-y-4 pt-4">
+               <div>
+                  <span className="font-mono-data text-[10px] text-slate-500 block uppercase tracking-widest mb-1">Physical Toll</span>
+                  <p className={`font-body text-sm text-[#d5c4ab] ${isLoading ? 'animate-pulse opacity-50' : ''}`}>{physicalTollProfileB}</p>
+               </div>
+               
+               <div>
+                  <span className="font-mono-data text-[10px] text-slate-500 block uppercase tracking-widest mb-1">Tipping Point</span>
+                  <p className={`font-body text-sm text-[#d5c4ab] ${isLoading ? 'animate-pulse opacity-50' : ''}`}>{tippingPointB}</p>
+               </div>
+             </CardContent>
+          </Card>
+       </div>
+       
+       <Card className="mt-8 bg-surface-container-low border border-outline-variant/30 shadow-2xl relative mb-12">
+          <CardHeader className="pb-2 flex flex-row items-baseline gap-4 border-b border-outline-variant/10">
+            <span className="material-symbols-outlined text-[#ffba20] mt-0">group</span>
+            <CardTitle className="font-headline text-xl font-black uppercase tracking-tighter text-on-surface">Gender Parity Contrast</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className={`font-body text-base text-on-surface-variant leading-relaxed max-w-4xl pt-6 ${isLoading ? 'animate-pulse opacity-50' : ''}`}>
+               {genderParityInsight}
+            </p>
+          </CardContent>
+       </Card>
     </main>
   );
 }

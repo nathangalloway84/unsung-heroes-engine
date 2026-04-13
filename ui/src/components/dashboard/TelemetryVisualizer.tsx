@@ -56,7 +56,6 @@ export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryDat
       {/* Narrative Block */}
       <section className="col-span-12 lg:col-span-5 space-y-6">
         <div className="bg-surface-container-low p-8 relative shadow-lg">
-          <div className="absolute top-4 right-4 font-mono-data text-[10px] text-slate-600 bg-surface-container-lowest px-2 py-1 uppercase tracking-widest border border-outline-variant/30">Dossier: HG_01</div>
           <h2 className="font-headline text-3xl font-black uppercase tracking-tighter mb-6 text-on-surface border-l-4 border-[#ffba20] pl-4">Hidden Grind</h2>
           <div className="space-y-4 text-on-surface-variant font-body leading-relaxed text-sm">
             <p className={`${loading ? 'animate-pulse opacity-50' : 'opacity-100'} transition-opacity`}>

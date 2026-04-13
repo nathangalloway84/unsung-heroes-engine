@@ -12,6 +12,11 @@ const compareRequestSchema = z.object({
 
 const compareGeminiResponseSchema = z.object({
   discrepancySynthesis: z.string(),
+  physicalTollProfileA: z.string(),
+  tippingPointA: z.string(),
+  physicalTollProfileB: z.string(),
+  tippingPointB: z.string(),
+  genderParityInsight: z.string(),
   telemetryDataA: z.array(z.object({ name: z.string(), value: z.number() })),
   telemetryDataB: z.array(z.object({ name: z.string(), value: z.number() }))
 });
@@ -83,8 +88,10 @@ router.post('/', async (req, res) => {
       CRITICAL RULE 2: You MUST conceptually synthesize 3-5 structural metrics for EACH sport, returning them as telemetryDataA and telemetryDataB arrays. Map them mathematically from 0-100 based on the strain, funding, or isolation levels.
       CRITICAL RULE 3: You MUST generate a "discrepancySynthesis" string. This AI output explicitly contrasts the financial and visibility realities of the two sports, highlighting the discrepancy.
       CRITICAL RULE 4: This "discrepancySynthesis" MUST strictly use conditional phrasing (e.g., "The lack of mainstream news coverage could isolate these athletes vs...", "Funding discrepancies might signify..."). Absolute guarantees of performance are strictly forbidden. Maintain the NIL ban.
+      CRITICAL RULE 5: Synthesize "physicalTollProfileA", "tippingPointA" for Sport A, and "physicalTollProfileB", "tippingPointB" for Sport B defining conditional bounds of strain and thresholds gracefully natively.
+      CRITICAL RULE 6: Synthesize a "genderParityInsight" explicitly capturing disparate impact loads matching Male and Female roster bounds intuitively logically conditionally natively.
       
-      Return valid JSON in this exact structure: {"discrepancySynthesis": "STRING MAXIMUM 4 SENTENCES", "telemetryDataA": [{"name": "string", "value": number}], "telemetryDataB": [{"name": "string", "value": number}]}
+      Return valid JSON in this exact structure: {"discrepancySynthesis": "STRING MAXIMUM 4 SENTENCES", "physicalTollProfileA": "...", "tippingPointA": "...", "physicalTollProfileB": "...", "tippingPointB": "...", "genderParityInsight": "...", "telemetryDataA": [{"name": "string", "value": number}], "telemetryDataB": [{"name": "string", "value": number}]}
       
       Sport A Context:
       News: ${newsDataA}

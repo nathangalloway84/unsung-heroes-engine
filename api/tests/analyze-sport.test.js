@@ -9,9 +9,9 @@ jest.mock('@google/genai', () => {
         models: {
           generateContent: jest.fn().mockImplementation(async (params) => {
             if (params.contents.includes("Head-to-Head Parity Engine")) {
-                return { text: "{\"discrepancySynthesis\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"telemetryDataA\": [{\"name\": \"Media Visibility Index (A)\", \"value\": 14}], \"telemetryDataB\": [{\"name\": \"Strain Index (B)\", \"value\": 92}]}" };
+                return { text: "{\"discrepancySynthesis\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"physicalTollProfileA\": \"Sport A might require extreme rotational tension.\", \"tippingPointA\": \"They could hit exhaustion by 26.\", \"physicalTollProfileB\": \"Sport B could demand absolute pulmonary strain.\", \"tippingPointB\": \"They might hit a financial threshold by 21.\", \"genderParityInsight\": \"The lack of visibility might disparately isolate female squads.\", \"telemetryDataA\": [{\"name\": \"Media Visibility Index (A)\", \"value\": 14}], \"telemetryDataB\": [{\"name\": \"Strain Index (B)\", \"value\": 92}]}" };
             }
-            return { text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"visibilityGapInsight\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}" };
+            return { text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"visibilityGapInsight\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"physicalTollProfile\": \"The strains might require unique rotational force resilience.\", \"tippingPoint\": \"Athletes could reach failure at the age of 24 due to funding.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}" };
           })
         }
       };
@@ -77,6 +77,8 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(response.body.success).toBe(true);
         expect(response.body.data.archetype).toBe("THE LEVERAGED SURVIVOR");
         expect(response.body.data.visibilityGapInsight).toBeDefined();
+        expect(response.body.data.physicalTollProfile).toContain("might require");
+        expect(response.body.data.tippingPoint).toContain("could reach");
         expect(response.body.data.telemetryData).toBeDefined();
         expect(response.body.metadata.activeSources).toBeDefined();
         expect(response.body.metadata.activeSources.length).toBe(3);
@@ -103,6 +105,9 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data.discrepancySynthesis).toContain('could limit the distribution');
+      expect(response.body.data.physicalTollProfileA).toContain('might require');
+      expect(response.body.data.tippingPointB).toContain('might hit');
+      expect(response.body.data.genderParityInsight).toContain('might disparately');
       expect(response.body.data.telemetryDataA).toBeDefined();
       expect(response.body.data.telemetryDataB).toBeDefined();
       

@@ -24,6 +24,8 @@ const geminiResponseSchema = z.object({
   archetype: z.string(),
   hiddenGrind: z.string(),
   visibilityGapInsight: z.string(),
+  physicalTollProfile: z.string(),
+  tippingPoint: z.string(),
   telemetryData: z.array(z.object({ name: z.string(), value: z.number() }))
 });
 
@@ -86,8 +88,10 @@ app.post('/api/analyze-sport', async (req, res) => {
       CRITICAL RULE 2: You MUST use conditional phrasing (e.g., "could lead to", "might signify"). Absolute guarantees of performance are strictly forbidden.
       CRITICAL RULE 3: You MUST conceptually synthesize 3-5 structural metrics from the text, returning them as a telemetryData array. These metrics must protect the NIL ban by measuring generalized, inferred systemic concepts mapped mathematically from 0-100.
       CRITICAL RULE 4: You MUST generate a "visibilityGapInsight" string mapping conditional metrics analyzing the scraped data. It must highlight the discrepancy between the sport's grueling realities and its lack of mainstream coverage. This insight MUST strictly use conditional phrasing (e.g., "The lack of mainstream news coverage could isolate these athletes...") and maintain the NIL ban.
+      CRITICAL RULE 5: Synthesize a "physicalTollProfile" string detailing an aggregate analysis of bodily strains and physical archetypes gracefully natively. Maintain NIL ban and conditionality.
+      CRITICAL RULE 6: Synthesize a "tippingPoint" string isolating the financial, emotional, or physical threshold where Olympic dreams are commonly abandoned. Maintain strict conditionality safely manually natively.
       You MUST integrate demographic trends and donor-funded financial impact realities into the analysis based on the auxiliary feeds provided.
-      Return valid JSON in this exact structure: {"archetype": "STRING MAX 4 WORDS", "hiddenGrind": "STRING MAXIMUM 3 SENTENCES", "visibilityGapInsight": "STRING MAXIMUM 3 SENTENCES", "telemetryData": [{"name": "string", "value": number}]}
+      Return valid JSON in this exact structure: {"archetype": "STRING MAX 4 WORDS", "hiddenGrind": "STRING MAXIMUM 3 SENTENCES", "visibilityGapInsight": "STRING MAXIMUM 3 SENTENCES", "physicalTollProfile": "STRING MAXIMUM 3 SENTENCES", "tippingPoint": "STRING MAXIMUM 3 SENTENCES", "telemetryData": [{"name": "string", "value": number}]}
       
       Primary Sport Feed:
       ${newsData}
