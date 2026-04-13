@@ -51,11 +51,20 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
   });
 
   describe('NIL Compliance & Pipeline Routing', () => {
-    it('Should correctly scrape up to 4500 characters and securely mock Vertex Gemini payload injection', async () => {
-        global.fetch.mockResolvedValue({
+    it('Should correctly scrape up to 2000 characters per URL gracefully evaluating concurrent auxiliary feeds natively inside Gemini payload injection', async () => {
+        global.fetch = jest.fn()
+          .mockResolvedValueOnce({
             ok: true,
             text: jest.fn().mockResolvedValue(`<html><body><p>Mock Team USA Wrestling content highlighting the hidden grind of regional matches.</p></body></html>`)
-        });
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            text: jest.fn().mockResolvedValue(`<html><body><p>Demographic mapping trends identifying average hometown relocations.</p></body></html>`)
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            text: jest.fn().mockResolvedValue(`<html><body><p>Explicit donor-funded financial pipeline requirements and limitations.</p></body></html>`)
+          });
 
         const response = await request(app)
             .post('/api/analyze-sport')
@@ -66,8 +75,11 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(response.body.data.archetype).toBe("THE LEVERAGED SURVIVOR");
         expect(response.body.data.telemetryData).toBeDefined();
         expect(response.body.data.telemetryData[0].name).toBe("Media Visibility Index");
-        // Verify we pinged the identical valid URL footprint
-        expect(global.fetch).toHaveBeenCalledWith('https://www.teamusa.com/news/wrestling');
+        // Verify we pinged the identical valid URL footprint sequentially hitting 3 explicit topologies natively
+        expect(global.fetch).toHaveBeenCalledTimes(3);
+        expect(global.fetch).toHaveBeenNthCalledWith(1, 'https://www.teamusa.com/news/wrestling');
+        expect(global.fetch).toHaveBeenNthCalledWith(2, 'https://www.teamusa.com/athletes');
+        expect(global.fetch).toHaveBeenNthCalledWith(3, 'https://www.teamusa.com/about');
     });
   });
 });
