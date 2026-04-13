@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SPORTS_CONFIG } from "@/config/sports";
 import { useTelemetryCache } from "@/components/providers/TelemetryProvider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SideNavBarProps {
   activeSector: string;
@@ -24,8 +25,7 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
   
   const sportsList = SPORTS_CONFIG[activeSector] || SPORTS_CONFIG["paralympics"];
 
-  const handleSectorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSector = e.target.value;
+  const handleSectorChange = (newSector: string) => {
     router.push(`/${newSector}`);
     setIsOpen(false);
   };
@@ -52,14 +52,15 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
           </div>
           <div className="flex flex-col">
             <label className="font-mono-data text-[10px] text-slate-500 tracking-widest mb-1">SECTOR FEED:</label>
-            <select 
-              value={activeSector} 
-              onChange={handleSectorChange}
-              className="bg-surface-container-low border border-outline-variant/30 text-xs font-mono-data uppercase p-2 text-on-surface focus:outline-none focus:border-[#ffba20] w-full"
-            >
-              <option value="paralympics">PARALYMPICS</option>
-              <option value="olympics">OLYMPICS</option>
-            </select>
+            <Select value={activeSector} onValueChange={handleSectorChange}>
+               <SelectTrigger className="w-full bg-surface-container-low border border-outline-variant/30 text-xs font-mono-data uppercase p-2 text-on-surface focus:outline-none focus:ring-[#ffba20] focus:ring-1 focus:border-[#ffba20] rounded-none">
+                 <SelectValue placeholder="SELECT SECTOR" />
+               </SelectTrigger>
+               <SelectContent className="bg-[#111827] border-outline-variant/30 text-xs font-mono-data uppercase text-on-surface rounded-none">
+                 <SelectItem value="paralympics" className="hover:bg-[#ffba20]/10 hover:text-[#ffba20] focus:bg-[#ffba20]/10 focus:text-[#ffba20]">PARALYMPICS</SelectItem>
+                 <SelectItem value="olympics" className="hover:bg-[#ffba20]/10 hover:text-[#ffba20] focus:bg-[#ffba20]/10 focus:text-[#ffba20]">OLYMPICS</SelectItem>
+               </SelectContent>
+            </Select>
           </div>
           
           <div className="flex flex-col mt-4">
