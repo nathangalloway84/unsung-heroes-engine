@@ -9,8 +9,9 @@ function CustomTick(props: Record<string, any>) {
   const originalText = payload?.value || "";
   
   const words = originalText.split(' ');
-  let line1 = words[0] || '';
-  let line2 = words.slice(1).join(' ');
+  const splitIndex = Math.ceil(words.length / 2);
+  let line1 = words.slice(0, splitIndex).join(' ');
+  let line2 = words.slice(splitIndex).join(' ');
   
   if (line1.length > 25) line1 = line1.substring(0, 22) + '...';
   if (line2.length > 25) line2 = line2.substring(0, 22) + '...';
@@ -91,7 +92,7 @@ export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryDat
               <div className="w-full h-full z-10 relative flex flex-col justify-center max-h-[350px]">
                   <div className="absolute top-0 left-0 font-mono-data text-[10px] text-[#ffba20] tracking-widest uppercase border border-[#ffba20]/30 px-2 py-1 bg-surface-container z-30">Live Sector Inference Matrix</div>
                   <ChartContainer config={chartConfig} className="mx-auto w-full aspect-square max-h-[350px]">
-                    <RadarChart data={telemetryData} margin={{ top: 30, right: 30, bottom: 30, left: 30 }}>
+                    <RadarChart outerRadius="68%" data={telemetryData} margin={{ top: 20, right: 50, bottom: 20, left: 50 }}>
                       <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                       <PolarGrid stroke="#514532" />
                       <PolarAngleAxis dataKey="name" tick={<CustomTick />} />
