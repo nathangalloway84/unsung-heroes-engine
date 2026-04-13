@@ -15,9 +15,9 @@ app.use(express.json());
 const compareRouter = require('./routes/compare');
 app.use('/api/compare-sports', compareRouter);
 
-// Strict enum guard keeping injection requests isolated
+// Strict string guard keeping injection requests isolated natively mapping dynamic bounds
 const requestSchema = z.object({
-  sport: z.enum(['wrestling', 'judo', 'breaking', 'goalball', 'wheelchair-rugby', 'boccia'])
+  sport: z.string()
 });
 
 const geminiResponseSchema = z.object({

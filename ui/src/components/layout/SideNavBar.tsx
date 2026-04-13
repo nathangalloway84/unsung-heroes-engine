@@ -85,7 +85,7 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1">
+        <nav className="flex-1 space-y-1 overflow-y-auto pb-4">
           {sportsList.map((sport) => {
             const isActive = activeSport === sport.id || (isCompareMode && (compareSportA === sport.id || compareSportB === sport.id));
             
