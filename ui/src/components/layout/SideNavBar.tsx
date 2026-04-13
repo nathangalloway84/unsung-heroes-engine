@@ -15,7 +15,12 @@ interface SideNavBarProps {
 
 export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpen }: SideNavBarProps) {
   const router = useRouter();
-  const { latency } = useTelemetryCache();
+  const { 
+    latency, 
+    isCompareMode, setIsCompareMode, 
+    compareSportA, setCompareSportA, 
+    compareSportB, setCompareSportB 
+  } = useTelemetryCache();
   
   const sportsList = SPORTS_CONFIG[activeSector] || SPORTS_CONFIG["paralympics"];
 
@@ -59,16 +64,54 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
               <option value="olympics">OLYMPICS</option>
             </select>
           </div>
+          
+          <div className="flex flex-col mt-4">
+             <button 
+                onClick={() => {
+                   setIsCompareMode(!isCompareMode);
+                   setCompareSportA("");
+                   setCompareSportB("");
+                   if (isCompareMode) router.push('/');
+                }}
+                className={`font-mono-data text-[10px] tracking-widest uppercase p-2 border transition-all ${isCompareMode ? 'bg-[#ffba20] text-black border-[#ffba20]' : 'bg-transparent text-slate-500 border-outline-variant/30 hover:text-[#ffba20]'}`}
+             >
+                [TOGGLE COMPARE MODE]
+             </button>
+             {isCompareMode && (
+                <div className="mt-2 text-[8px] font-mono-data tracking-widest text-[#96ccff]">
+                   A: {compareSportA || 'PENDING'} | B: {compareSportB || 'PENDING'}
+                </div>
+             )}
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1">
           {sportsList.map((sport) => {
-            const isActive = activeSport === sport.id;
+            const isActive = activeSport === sport.id || (isCompareMode && (compareSportA === sport.id || compareSportB === sport.id));
+            
+            const handleSportClick = (e: React.MouseEvent) => {
+              if (isCompareMode) {
+                 e.preventDefault();
+                 if (!compareSportA) {
+                    setCompareSportA(sport.id);
+                 } else if (!compareSportB && sport.id !== compareSportA) {
+                    setCompareSportB(sport.id);
+                    setIsOpen(false);
+                    router.push(`/compare?sportA=${compareSportA}&sportB=${sport.id}`);
+                 } else {
+                    setCompareSportA(sport.id);
+                    setCompareSportB("");
+                 }
+              } else {
+                 setIsOpen(false);
+              }
+            };
+
             return (
               <Link 
                 key={sport.id}
                 href={`/${activeSector}/${sport.id}`}
-                onClick={() => setIsOpen(false)}
+                onClick={handleSportClick}
                 className={`w-full text-left group flex items-center px-6 py-3 transition-all duration-100 font-bold border-l-2 ${isActive ? 'border-[#ffba20] bg-[#131b2e] text-[#ffba20]' : 'border-transparent text-slate-400 hover:text-[#ffba20] hover:bg-[#131b2e]/50'}`}
               >
                 <span className="material-symbols-outlined mr-4">{sport.icon}</span>

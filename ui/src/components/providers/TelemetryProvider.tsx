@@ -19,6 +19,12 @@ interface TelemetryContextType {
   setIsLoading: (val: boolean) => void;
   latency: string;
   setLatency: (val: string) => void;
+  isCompareMode: boolean;
+  setIsCompareMode: (val: boolean) => void;
+  compareSportA: string;
+  setCompareSportA: (val: string) => void;
+  compareSportB: string;
+  setCompareSportB: (val: string) => void;
 }
 
 const TelemetryContext = createContext<TelemetryContextType | undefined>(undefined);
@@ -28,13 +34,19 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   const [activeArchetype, setActiveArchetype] = useState("MISSION BRIEFING");
   const [isLoading, setIsLoading] = useState(false);
   const [latency, setLatency] = useState("STANDBY");
+  const [isCompareMode, setIsCompareMode] = useState(false);
+  const [compareSportA, setCompareSportA] = useState("");
+  const [compareSportB, setCompareSportB] = useState("");
 
   const setCachePayload = (sportId: string, payload: CachedDossier) => {
     setCache((prev) => ({ ...prev, [sportId]: payload }));
   };
 
   return (
-    <TelemetryContext.Provider value={{ cache, setCachePayload, activeArchetype, setActiveArchetype, isLoading, setIsLoading, latency, setLatency }}>
+    <TelemetryContext.Provider value={{ 
+        cache, setCachePayload, activeArchetype, setActiveArchetype, isLoading, setIsLoading, latency, setLatency,
+        isCompareMode, setIsCompareMode, compareSportA, setCompareSportA, compareSportB, setCompareSportB
+    }}>
       {children}
     </TelemetryContext.Provider>
   );

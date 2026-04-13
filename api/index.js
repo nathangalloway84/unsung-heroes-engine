@@ -12,6 +12,9 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+const compareRouter = require('./routes/compare');
+app.use('/api/compare-sports', compareRouter);
+
 // Strict enum guard keeping injection requests isolated
 const requestSchema = z.object({
   sport: z.enum(['wrestling', 'judo', 'breaking', 'goalball', 'wheelchair-rugby', 'boccia'])

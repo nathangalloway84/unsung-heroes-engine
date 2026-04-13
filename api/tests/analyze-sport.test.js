@@ -7,8 +7,11 @@ jest.mock('@google/genai', () => {
     GoogleGenAI: jest.fn().mockImplementation(() => {
       return {
         models: {
-          generateContent: jest.fn().mockResolvedValue({
-            text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"visibilityGapInsight\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}"
+          generateContent: jest.fn().mockImplementation(async (params) => {
+            if (params.contents.includes("Head-to-Head Parity Engine")) {
+                return { text: "{\"discrepancySynthesis\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"telemetryDataA\": [{\"name\": \"Media Visibility Index (A)\", \"value\": 14}], \"telemetryDataB\": [{\"name\": \"Strain Index (B)\", \"value\": 92}]}" };
+            }
+            return { text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"visibilityGapInsight\": \"The lack of mainstream coverage could limit the distribution of standard athletic resources.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}" };
           })
         }
       };
@@ -83,6 +86,34 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(global.fetch).toHaveBeenNthCalledWith(1, 'https://www.teamusa.com/news/wrestling');
         expect(global.fetch).toHaveBeenNthCalledWith(2, 'https://www.teamusa.com/athletes');
         expect(global.fetch).toHaveBeenNthCalledWith(3, 'https://www.teamusa.com/about');
+    });
+  });
+
+  describe('POST /api/compare-sports', () => {
+    it('returns a successfully mapped synthesis across dual URL payloads gracefully adhering to NIL conditionals natively', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        text: jest.fn().mockResolvedValue('<p>Sample team data.</p>')
+      });
+
+      const response = await request(app)
+        .post('/api/compare-sports')
+        .send({ sportA: 'breaking', sportB: 'goalball' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.discrepancySynthesis).toContain('could limit the distribution');
+      expect(response.body.data.telemetryDataA).toBeDefined();
+      expect(response.body.data.telemetryDataB).toBeDefined();
+      
+      expect(response.body.metadata.activeSourcesA).toBeDefined();
+      expect(response.body.metadata.activeSourcesB).toBeDefined();
+      expect(response.body.metadata.activeSourcesA.length).toBe(3);
+      expect(response.body.metadata.activeSourcesB.length).toBe(3);
+      
+      expect(global.fetch).toHaveBeenCalledTimes(6);
+      expect(global.fetch).toHaveBeenCalledWith('https://www.teamusa.com/news/breaking');
+      expect(global.fetch).toHaveBeenCalledWith('https://www.teamusa.com/news/goalball');
     });
   });
 });
