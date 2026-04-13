@@ -1,13 +1,16 @@
+"use client";
+
 import React from "react";
+import { useTelemetryCache } from "@/components/providers/TelemetryProvider";
 
 interface TopNavBarProps {
-  archetype: string;
-  loading: boolean;
   activeSport?: string;
   toggleMenu: () => void;
 }
 
-export default function TopNavBar({ archetype, loading, activeSport, toggleMenu }: TopNavBarProps) {
+export default function TopNavBar({ activeSport, toggleMenu }: TopNavBarProps) {
+  const { activeArchetype, isLoading } = useTelemetryCache();
+
   return (
     <header className="fixed top-0 right-0 left-0 lg:left-64 z-30 flex justify-between items-center px-4 md:px-8 h-16 bg-[#0b1326]/60 backdrop-blur-md border-b border-[#514532] transition-all">
       <div className="flex items-center gap-4 md:gap-8">
@@ -24,8 +27,8 @@ export default function TopNavBar({ archetype, loading, activeSport, toggleMenu 
       </div>
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 md:gap-4 bg-surface-container-lowest px-2 py-1 md:px-4 md:py-2 border-b border-secondary-container">
-          <span className="font-headline text-[#ffba20] text-[10px] md:text-xs font-black tracking-widest uppercase truncate max-w-[120px] md:max-w-xs">{archetype}</span>
-          <span className={`material-symbols-outlined text-[#ffba20] text-sm md:text-lg ${loading ? 'animate-pulse' : ''}`}>terminal</span>
+          <span className="font-headline text-[#ffba20] text-[10px] md:text-xs font-black tracking-widest uppercase truncate max-w-[120px] md:max-w-xs">{activeArchetype}</span>
+          <span className={`material-symbols-outlined text-[#ffba20] text-sm md:text-lg ${isLoading ? 'animate-pulse' : ''}`}>terminal</span>
         </div>
       </div>
     </header>
