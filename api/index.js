@@ -55,7 +55,8 @@ app.post('/api/analyze-sport', async (req, res) => {
       You are an expert sports analyst focused on the "Hidden Grind" of non-mainstream sports.
       CRITICAL RULE 1: Analyze the provided scraped text string from the Team USA feed. Nullify any Name, Image, or Likeness (NIL) tracking outputs into generalized structural observations of the sport itself.
       CRITICAL RULE 2: You MUST use conditional phrasing (e.g., "could lead to", "might signify"). Absolute guarantees of performance are strictly forbidden.
-      Return valid JSON in this exact structure: {"archetype": "STRING MAX 4 WORDS", "hiddenGrind": "STRING MAXIMUM 3 SENTENCES"}
+      CRITICAL RULE 3: You MUST conceptually synthesize 3-5 structural metrics from the text, returning them as a telemetryData array. These metrics must protect the NIL ban by measuring generalized, inferred systemic concepts (e.g., "Media Visibility Index", "Annual Travel Strain", "Grassroots Funding %") mapped mathematically from 0-100.
+      Return valid JSON in this exact structure: {"archetype": "STRING MAX 4 WORDS", "hiddenGrind": "STRING MAXIMUM 3 SENTENCES", "telemetryData": [{"name": "string", "value": number}]}
       
       SCRAPED TEAM USA FEED DATA:
       ${scrapedText}
@@ -74,7 +75,7 @@ app.post('/api/analyze-sport', async (req, res) => {
         const finalJson = JSON.parse(cleanedMetadata);
         return res.status(200).json({ success: true, data: finalJson });
     } catch(e) {
-        return res.status(500).json({ error: 'Upstream schema corruption avoiding parsing error bounds' });
+        return res.status(500).json({ error: 'Upstream schema corruption avoiding parsing error bounds', debug: outputText });
     }
 
   } catch (error) {

@@ -12,12 +12,14 @@ export default function Dashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [archetype, setArchetype] = useState("MISSION BRIEFING");
   const [hiddenGrind, setHiddenGrind] = useState("The Unsung Heroes Engine is an AI-powered telemetry dashboard designed to illuminate the hidden realities, financial strains, and extreme sacrifices of Team USA's Olympic and Paralympic athletes operating outside the mainstream media spotlight. Select a sector to initialize the data stream.");
+  const [telemetryData, setTelemetryData] = useState<any[]>([]);
 
   const handleAnalyze = async (sport: string) => {
     setActiveSport(sport);
     setLoading(true);
     setArchetype("EXTRACTING RAW FEEDS...");
     setHiddenGrind("Scraping live Team USA context URLs and verifying semantic safety bounds...");
+    setTelemetryData([]);
     
     // Auto-close menu on mobile when analyzing
     if(isMobileMenuOpen) setIsMobileMenuOpen(false);
@@ -34,6 +36,11 @@ export default function Dashboard() {
       if (resData.success) {
         setArchetype(resData.data.archetype);
         setHiddenGrind(resData.data.hiddenGrind);
+        setTelemetryData(resData.data.telemetryData || [
+          { name: "Synthetic Load (Fallback)", value: 40 },
+          { name: "Visibility Block (Fallback)", value: 15 },
+          { name: "Financial Strain (Fallback)", value: 85 }
+        ]);
       } else {
         setArchetype("CONNECTION ERROR");
         setHiddenGrind(resData.error || "Failed to parse narrative scraping feeds. Terminal blocked.");
@@ -76,7 +83,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={loading} />
+        <TelemetryVisualizer hiddenGrind={hiddenGrind} loading={loading} telemetryData={telemetryData} />
         <VisibilityGapCard activeSport={activeSport} />
       </main>
     </>

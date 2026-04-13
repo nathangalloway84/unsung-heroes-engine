@@ -8,7 +8,7 @@ jest.mock('@google/genai', () => {
       return {
         models: {
           generateContent: jest.fn().mockResolvedValue({
-            text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\"}"
+            text: "{\"archetype\": \"THE LEVERAGED SURVIVOR\", \"hiddenGrind\": \"Data indicates this could lead to generalized success without strict guarantees.\", \"telemetryData\": [{\"name\": \"Media Visibility Index\", \"value\": 14}, {\"name\": \"Travel Strain Matrix\", \"value\": 92}]}"
           })
         }
       };
@@ -64,6 +64,8 @@ describe('POST /api/analyze-sport [VERTEX AI PIPELINE]', () => {
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
         expect(response.body.data.archetype).toBe("THE LEVERAGED SURVIVOR");
+        expect(response.body.data.telemetryData).toBeDefined();
+        expect(response.body.data.telemetryData[0].name).toBe("Media Visibility Index");
         // Verify we pinged the identical valid URL footprint
         expect(global.fetch).toHaveBeenCalledWith('https://www.teamusa.com/news/wrestling');
     });
