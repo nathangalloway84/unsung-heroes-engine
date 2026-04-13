@@ -41,7 +41,9 @@ export default function SideNavBar({ activeSector, activeSport, isOpen, setIsOpe
         
         <div className="px-6 mb-10 flex flex-col gap-4">
           <div className="flex justify-between items-start">
-            <h1 className="text-xl font-black uppercase tracking-tighter text-[#ffba20] font-headline">UNSUNG HEROES</h1>
+            <Link href="/" onClick={() => setIsOpen(false)} className="hover:opacity-80 transition-opacity">
+              <h1 className="text-xl font-black uppercase tracking-tighter text-[#ffba20] font-headline">UNSUNG HEROES</h1>
+            </Link>
             <button className="lg:hidden text-slate-400" onClick={() => setIsOpen(false)}>
               <span className="material-symbols-outlined">close</span>
             </button>
