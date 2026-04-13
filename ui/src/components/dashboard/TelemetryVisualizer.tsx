@@ -61,7 +61,7 @@ export default function TelemetryVisualizer({ hiddenGrind, loading, telemetryDat
               <div className="w-full h-full z-10 relative flex flex-col justify-center max-h-[350px]">
                   <div className="absolute top-0 left-0 font-mono-data text-[10px] text-[#ffba20] tracking-widest uppercase border border-[#ffba20]/30 px-2 py-1 bg-surface-container z-30">Live Sector Inference Matrix</div>
                   <ChartContainer config={chartConfig} className="mx-auto w-full aspect-square max-h-[350px]">
-                    <RadarChart data={telemetryData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="55%" data={telemetryData} margin={{ top: 25, right: 50, bottom: 25, left: 50 }}>
                       <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                       <PolarGrid stroke="#514532" />
                       <PolarAngleAxis dataKey="name" tick={{ fill: "#d5c4ab", fontSize: 10, fontFamily: "JetBrains Mono" }} />
